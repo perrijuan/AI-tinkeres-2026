@@ -34,10 +34,10 @@ export default function HeroSection() {
             <h1 className="text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight">
               Decisões mais{" "}
               <span className="text-primary">seguras</span>{" "}
-              para o agronegócio
+              para a agricultura brasileira
             </h1>
             <p className="text-lg text-primary-foreground/70 leading-relaxed max-w-lg">
-              A SafraViva integra o ZARC com dados satelitais em tempo real,
+              O SafraViva integra o ZARC com dados satelitais em tempo real,
               gerando scores de risco precisos por área agrícola — atualizado
               continuamente para refletir o que acontece agora.
             </p>

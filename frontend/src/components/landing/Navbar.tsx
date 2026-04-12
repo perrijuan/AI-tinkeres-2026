@@ -45,11 +45,18 @@ export default function Navbar() {
             <Leaf className="w-4 h-4 text-primary-foreground" />
           </div>
           <div className="leading-none">
-            <span className="font-bold text-base block">SafraViva</span>
+            <span
+              className={cn(
+                "font-bold text-base block transition-colors",
+                scrolled ? "text-foreground" : "text-white"
+              )}
+            >
+              SafraViva
+            </span>
             <span
               className={cn(
                 "text-[10px] block transition-colors",
-                scrolled ? "text-muted-foreground" : "text-primary-foreground/60"
+                scrolled ? "text-muted-foreground" : "text-white/60"
               )}
             >
               Inteligência Climática
