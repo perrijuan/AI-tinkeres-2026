@@ -3,9 +3,14 @@ from typing import Any
 from src.utils.time import to_iso_z
 
 
-def _build_data_sources(climate_data: dict[str, Any], agro_context: dict[str, Any]) -> dict[str, Any]:
+def _build_data_sources(
+    climate_data: dict[str, Any],
+    climate_history: dict[str, Any] | None,
+    agro_context: dict[str, Any],
+) -> dict[str, Any]:
     territory = agro_context["territorial_context"]
     zarc_context = agro_context.get("zarc_context", {})
+    soil_context = agro_context.get("soil_context", {})
 
     satellite_signals = list(territory.get("signals", []))
     if territory.get("ndvi") is not None:
@@ -14,6 +19,12 @@ def _build_data_sources(climate_data: dict[str, Any], agro_context: dict[str, An
         satellite_signals.append(f"EVI medio recente: {territory['evi']}.")
     if territory.get("lst_c") is not None:
         satellite_signals.append(f"LST medio recente: {territory['lst_c']} C.")
+    if territory.get("ndvi_trend"):
+        satellite_signals.append(f"Tendencia NDVI recente: {territory['ndvi_trend']}.")
+    if territory.get("ndvi_delta_30d") is not None:
+        satellite_signals.append(f"Delta NDVI recente: {territory['ndvi_delta_30d']}.")
+    if territory.get("ndvi_anomaly") is not None:
+        satellite_signals.append(f"Anomalia NDVI: {territory['ndvi_anomaly']}.")
 
     historical = agro_context["historical_yield_context"]
     historical_signals = [
@@ -29,12 +40,46 @@ def _build_data_sources(climate_data: dict[str, Any], agro_context: dict[str, An
             "coverage": "14 dias",
             "signals": climate_data.get("signals", []),
         },
+        "climate_history": {
+            "provider": (climate_history or {}).get("provider", "SafraViva Climate History"),
+            "dataset": (climate_history or {}).get("dataset", "mvp"),
+            "window_start": (climate_history or {}).get("window_start"),
+            "window_end": (climate_history or {}).get("window_end"),
+            "latest_observed_date": (climate_history or {}).get("latest_observed_date"),
+            "data_lag_days": (climate_history or {}).get("data_lag_days"),
+            "precip_observed_7d_mm": (climate_history or {}).get("precip_observed_7d_mm"),
+            "precip_observed_30d_mm": (climate_history or {}).get("precip_observed_30d_mm"),
+            "precip_climatology_30d_mm": (climate_history or {}).get("precip_climatology_30d_mm"),
+            "precip_anomaly_30d_mm": (climate_history or {}).get("precip_anomaly_30d_mm"),
+            "precip_anomaly_30d_pct": (climate_history or {}).get("precip_anomaly_30d_pct"),
+            "dry_days_30d": (climate_history or {}).get("dry_days_30d"),
+            "timeseries_30d": (climate_history or {}).get("timeseries_30d", []),
+            "signals": (climate_history or {}).get("signals", []),
+        },
         "satellite": {
             "provider": territory.get("provider", "SafraViva Territory"),
             "last_image": territory.get("last_image") or climate_data["forecast_run_timestamp"],
             "cloud_cover_pct": territory.get("cloud_cover_pct") or 0.0,
+            "ndvi_trend": territory.get("ndvi_trend", "stable"),
+            "ndvi_delta_30d": territory.get("ndvi_delta_30d", 0.0),
+            "ndvi_anomaly": territory.get("ndvi_anomaly", 0.0),
+            "vegetation_mismatch_flag": bool(territory.get("vegetation_mismatch_flag", False)),
             "signals": satellite_signals,
             "ndvi_timeseries": territory.get("ndvi_timeseries", []),
+        },
+        "soil": {
+            "provider": soil_context.get("provider", "BDSolos/Embrapa"),
+            "source": soil_context.get("source", "fallback"),
+            "interpretation_scope": soil_context.get("interpretation_scope", "estrutural"),
+            "temporal_nature": soil_context.get("temporal_nature", "historico_heterogeneo"),
+            "short_term_reliability": soil_context.get("short_term_reliability", "baixa"),
+            "soil_quality_index": soil_context.get("soil_quality_index", 0.5),
+            "soil_quality_label": soil_context.get("soil_quality_label", "media"),
+            "soil_good_flag": bool(soil_context.get("soil_good_flag", False)),
+            "confidence_index": soil_context.get("confidence_index", 0.3),
+            "sample_count": soil_context.get("sample_count", 0),
+            "nearest_sample_km": soil_context.get("nearest_sample_km"),
+            "signals": soil_context.get("signals", []),
         },
         "zarc": {
             "provider": zarc_context.get("provider", "SafraViva ZARC"),
@@ -55,6 +100,7 @@ def build_frontend_response(
     inputs: dict[str, Any],
     spatial_context: dict[str, Any],
     climate_data: dict[str, Any],
+    climate_history: dict[str, Any] | None,
     agro_context: dict[str, Any],
     risk_result: dict[str, Any],
     alert_data: dict[str, Any],
@@ -89,7 +135,7 @@ def build_frontend_response(
             "wind_mean_7d_ms": climate_data["wind_mean_7d_ms"],
         },
         "risk_flags": risk_result["risk_flags"],
-        "data_sources": _build_data_sources(climate_data, agro_context),
+        "data_sources": _build_data_sources(climate_data, climate_history, agro_context),
         "forecast_timeseries": climate_data["forecast_timeseries"],
         "map_layer": map_layer,
         "copilot_response": alert_data["copilot_response"],

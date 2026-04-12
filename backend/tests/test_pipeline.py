@@ -45,6 +45,7 @@ class PipelineTestCase(unittest.TestCase):
         self.assertEqual(len(result["forecast_timeseries"]), 14)
         self.assertIn("wind_mean_7d_ms", result["metrics"])
         self.assertIn("climate", result["data_sources"])
+        self.assertIn("climate_history", result["data_sources"])
         self.assertIn("satellite", result["data_sources"])
 
     def test_analysis_accepts_iso_string_dates(self) -> None:
