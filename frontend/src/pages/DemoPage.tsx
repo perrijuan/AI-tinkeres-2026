@@ -1,5 +1,5 @@
-import { useState, useCallback } from "react"
-import { Link } from "react-router-dom"
+import { useState, useCallback, useEffect } from "react"
+import { Link, useNavigate } from "react-router-dom"
 import {
   MapContainer,
   TileLayer,
@@ -18,6 +18,13 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
 import { Alert, AlertDescription } from "@/components/ui/alert"
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select"
 import { cn } from "@/lib/utils"
 import {
   Leaf,
@@ -62,22 +69,47 @@ function MapClickHandler({ onClick }: { onClick: (ll: LatLng) => void }) {
 
 // ── Tipos ────────────────────────────────────────────────────────────────────
 
+interface Cultura {
+  id: string
+  label: string
+}
+
 interface FormData {
   nome: string
   empresa: string
   email: string
+  cultura: string
 }
 
 // ── Página ───────────────────────────────────────────────────────────────────
 
 export default function DemoPage() {
+  const navigate = useNavigate()
   const [form, setForm] = useState<FormData>({
     nome: "",
     empresa: "",
     email: "",
+    cultura: "",
   })
+  const [culturas, setCulturas] = useState<Cultura[]>([])
   const [points, setPoints] = useState<LatLng[]>([])
   const [confirmed, setConfirmed] = useState(false)
+
+  useEffect(() => {
+    fetch("http://localhost:8000/culturas")
+      .then((r) => r.json())
+      .then(setCulturas)
+      .catch(() => {})
+  }, [])
+
+  useEffect(() => {
+    document.documentElement.style.overflow = "hidden"
+    document.body.style.overflow = "hidden"
+    return () => {
+      document.documentElement.style.overflow = ""
+      document.body.style.overflow = ""
+    }
+  }, [])
 
   const addPoint = useCallback(
     (latlng: LatLng) => {
@@ -94,7 +126,7 @@ export default function DemoPage() {
     setConfirmed(false)
   }
 
-  const handleConfirm = () => {
+  const handleConfirm = async () => {
     if (points.length < 3) return
 
     const areaHa = calcAreaHa(points)
@@ -104,13 +136,13 @@ export default function DemoPage() {
       nome: form.nome,
       empresa: form.empresa,
       email: form.email,
+      cultura: form.cultura,
       poligono: {
         coordenadas: points.map((p) => [p.lat, p.lng]),
         geoJSON: {
           type: "Feature",
           geometry: {
             type: "Polygon",
-            // GeoJSON usa [lng, lat] e fecha o anel repetindo o 1º ponto
             coordinates: [
               [
                 ...points.map((p) => [p.lng, p.lat]),
@@ -136,11 +168,21 @@ export default function DemoPage() {
       timestamp: new Date().toISOString(),
     }
 
-    console.log("🌱 SafraViva — Demo Request:", payload)
-    setConfirmed(true)
+    try {
+      const res = await fetch("http://localhost:8000/mock/analysis", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      })
+      const analysis = await res.json()
+      navigate("/resultado", { state: { analysis } })
+    } catch {
+      console.log("🌱 SafraViva — Demo Request (offline):", payload)
+      setConfirmed(true)
+    }
   }
 
-  const canConfirm = points.length >= 3 && !!form.nome && !!form.email
+  const canConfirm = points.length >= 3 && !!form.nome && !!form.email && !!form.cultura
   const areaPreview = calcAreaHa(points)
   const centroide = points.length >= 3 ? calcCentroid(points) : null
 
@@ -165,10 +207,10 @@ export default function DemoPage() {
       </header>
 
       {/* ── Layout principal ── */}
-      <div className="flex-1 container mx-auto max-w-7xl px-4 py-6 grid lg:grid-cols-[360px_1fr] gap-6 items-start lg:h-[calc(100vh-56px)] lg:overflow-hidden">
+      <div className="flex-1 container mx-auto max-w-7xl px-4 py-6 grid lg:grid-cols-[360px_1fr] gap-6 items-start lg:h-[calc(100vh-56px)] lg:overflow-hidden lg:min-h-0">
 
         {/* ── Painel esquerdo: formulário ── */}
-        <div className="flex flex-col gap-4 lg:h-full lg:overflow-hidden">
+        <div className="flex flex-col gap-4 lg:h-full lg:overflow-y-auto lg:min-h-0">
           <div>
             <h1 className="text-xl font-bold">Solicitar Demo</h1>
             <p className="text-sm text-muted-foreground mt-0.5">
@@ -213,6 +255,25 @@ export default function DemoPage() {
                   value={form.email}
                   onChange={(e) => setForm({ ...form, email: e.target.value })}
                 />
+              </div>
+              <div className="space-y-1">
+                <Label>Cultura *</Label>
+                <Select
+                  value={form.cultura}
+                  onValueChange={(v) => setForm({ ...form, cultura: v })}
+                  disabled={culturas.length === 0}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder={culturas.length === 0 ? "Carregando…" : "Selecione a cultura"} />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {culturas.map((c) => (
+                      <SelectItem key={c.id} value={c.id}>
+                        {c.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </CardContent>
           </Card>
@@ -273,17 +334,20 @@ export default function DemoPage() {
           {/* CTA / Sucesso */}
           <div className="mt-auto flex flex-col gap-2">
           {confirmed ? (
-            <Alert className="border-primary/30 bg-primary/8">
-              <CheckCircle2 className="h-4 w-4 text-primary" />
-              <AlertDescription className="text-sm">
-                <span className="font-semibold text-primary block mb-0.5">
-                  Parâmetros registrados!
-                </span>
-                Abra o console do navegador{" "}
-                <kbd className="rounded bg-muted px-1 text-xs">F12</kbd> para
-                ver o payload completo.
-              </AlertDescription>
-            </Alert>
+            <div className="space-y-2">
+              <Alert className="border-primary/30 bg-primary/8">
+                <CheckCircle2 className="h-4 w-4 text-primary" />
+                <AlertDescription className="text-sm">
+                  <span className="font-semibold text-primary block mb-0.5">
+                    Parâmetros registrados!
+                  </span>
+                  Área e dados enviados com sucesso.
+                </AlertDescription>
+              </Alert>
+              <Button className="w-full gap-2" asChild>
+                <Link to="/resultado">Ver análise de risco</Link>
+              </Button>
+            </div>
           ) : (
             <Button
               className="w-full gap-2"
@@ -299,6 +363,8 @@ export default function DemoPage() {
             <p className="text-xs text-muted-foreground text-center">
               {!form.nome || !form.email
                 ? "Preencha nome e e-mail para continuar."
+                : !form.cultura
+                ? "Selecione a cultura."
                 : "Marque pelo menos 3 pontos no mapa."}
             </p>
           )}
