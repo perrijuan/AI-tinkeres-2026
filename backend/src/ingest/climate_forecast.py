@@ -2,7 +2,7 @@ import hashlib
 import math
 import os
 import random
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from typing import Any
 
 from src.ingest.gee_client import get_ee_client, to_ee_polygon
@@ -19,13 +19,6 @@ def _round(value: float, digits: int = 1) -> float:
     return round(float(value), digits)
 
 
-def _pick_band(available_bands: set[str], candidates: list[str]) -> str | None:
-    for band in candidates:
-        if band in available_bands:
-            return band
-    return None
-
-
 def _to_celsius(temp_value: float) -> float:
     if temp_value > 170:
         return temp_value - 273.15
@@ -39,20 +32,14 @@ def _safe_float(value: Any, default: float = 0.0) -> float:
         return default
 
 
-def _region_mean(ee: Any, image: Any, geometry: Any, scale: int = 25_000) -> float | None:
+def _to_epoch_millis(value: datetime) -> int:
+    return int(ensure_utc(value).timestamp() * 1000)
+
+
+def _optional_float(value: Any) -> float | None:
+    if value is None:
+        return None
     try:
-        result = image.reduceRegion(
-            reducer=ee.Reducer.mean(),
-            geometry=geometry,
-            scale=scale,
-            bestEffort=True,
-            maxPixels=1_000_000_000,
-        ).getInfo()
-        if not result:
-            return None
-        value = next(iter(result.values()))
-        if value is None:
-            return None
         return float(value)
     except Exception:
         return None
@@ -72,84 +59,144 @@ def _try_get_gee_climate_forecast(
 
     try:
         analysis_utc = ensure_utc(analysis_timestamp)
-        start_dt = analysis_utc.replace(hour=0, minute=0, second=0, microsecond=0)
-        end_dt = start_dt + timedelta(days=15)
-
+        # Daily series should represent "next days" from the day after analysis.
+        start_dt = analysis_utc.replace(hour=0, minute=0, second=0, microsecond=0) + timedelta(days=1)
+        end_dt = start_dt + timedelta(days=14)
         polygon = to_ee_polygon(ee, geometry)
         centroid = ee.Geometry.Point([spatial_context["centroid_lon"], spatial_context["centroid_lat"]])
+        analysis_ms = _to_epoch_millis(analysis_utc)
 
-        collection = (
+        # Use a short lookback window to keep queries fast, with safe fallback to full history.
+        recent_window_ms = _to_epoch_millis(analysis_utc - timedelta(days=3))
+        base_collection = (
             ee.ImageCollection("NOAA/GFS0P25")
-            .filterDate(to_iso_z(start_dt), to_iso_z(end_dt))
             .filterBounds(polygon)
-            .sort("system:time_start")
+            .filter(ee.Filter.gte("creation_time", recent_window_ms))
+            .filter(ee.Filter.lte("creation_time", analysis_ms))
         )
-
-        if _safe_float(collection.size().getInfo()) == 0:
+        latest_run_ms = int(_safe_float(base_collection.aggregate_max("creation_time").getInfo()))
+        if latest_run_ms <= 0:
+            base_collection = (
+                ee.ImageCollection("NOAA/GFS0P25")
+                .filterBounds(polygon)
+                .filter(ee.Filter.lte("creation_time", analysis_ms))
+            )
+            latest_run_ms = int(_safe_float(base_collection.aggregate_max("creation_time").getInfo()))
+        if latest_run_ms <= 0:
             return None
 
-        first_image = ee.Image(collection.first())
-        available_bands = set(first_image.bandNames().getInfo())
-
-        precip_band = _pick_band(
-            available_bands,
-            [
-                "total_precipitation_surface",
-                "total_precipitation_surface_6_Hour_Accumulation",
-                "precipitable_water_entire_atmosphere",
-            ],
+        run_collection = (
+            base_collection.filter(ee.Filter.eq("creation_time", latest_run_ms))
+            .filter(ee.Filter.gte("forecast_time", _to_epoch_millis(start_dt)))
+            .filter(ee.Filter.lt("forecast_time", _to_epoch_millis(end_dt)))
+            .sort("forecast_time")
         )
-        temp_band = _pick_band(available_bands, ["temperature_2m_above_ground"])
-        humidity_band = _pick_band(available_bands, ["relative_humidity_2m_above_ground"])
-        wind_band = _pick_band(available_bands, ["wind_speed_10m_above_ground"])
-        u_wind_band = _pick_band(available_bands, ["u_component_of_wind_10m_above_ground"])
-        v_wind_band = _pick_band(available_bands, ["v_component_of_wind_10m_above_ground"])
 
-        if precip_band is None or temp_band is None:
+        def _sample_image(image: Any) -> Any:
+            reduced = image.reduceRegion(
+                reducer=ee.Reducer.mean(),
+                geometry=centroid,
+                scale=25_000,
+                bestEffort=True,
+                maxPixels=1_000_000_000,
+            )
+            return ee.Feature(None, reduced).set(
+                {
+                    "forecast_time": image.get("forecast_time"),
+                    "forecast_hours": image.get("forecast_hours"),
+                }
+            )
+
+        sampled_features = ee.FeatureCollection(run_collection.map(_sample_image)).getInfo().get("features", [])
+        if not sampled_features:
             return None
+
+        records: list[dict[str, Any]] = []
+        for feature in sampled_features:
+            props = feature.get("properties", {})
+            forecast_time_ms = _optional_float(props.get("forecast_time"))
+            forecast_hours = _optional_float(props.get("forecast_hours"))
+            if forecast_time_ms is None or forecast_hours is None:
+                continue
+
+            records.append(
+                {
+                    "forecast_time_ms": forecast_time_ms,
+                    "forecast_hours": forecast_hours,
+                    "temp_raw": _optional_float(props.get("temperature_2m_above_ground")),
+                    "humidity_raw": _optional_float(props.get("relative_humidity_2m_above_ground")),
+                    "precip_total_raw": _optional_float(props.get("total_precipitation_surface")),
+                    "precip_rate_raw": _optional_float(props.get("precipitation_rate")),
+                    "wind_speed_raw": _optional_float(props.get("wind_speed_10m_above_ground")),
+                    "u_wind_raw": _optional_float(props.get("u_component_of_wind_10m_above_ground")),
+                    "v_wind_raw": _optional_float(props.get("v_component_of_wind_10m_above_ground")),
+                }
+            )
+
+        if not records:
+            return None
+
+        records.sort(key=lambda item: item["forecast_hours"])
+        for index, record in enumerate(records):
+            if index == 0:
+                record["step_hours"] = max(1.0, record["forecast_hours"])
+            else:
+                delta = record["forecast_hours"] - records[index - 1]["forecast_hours"]
+                record["step_hours"] = max(1.0, delta)
+
+        daily: dict[str, dict[str, list[float]]] = {}
+        for record in records:
+            forecast_dt = datetime.fromtimestamp(record["forecast_time_ms"] / 1000, tz=timezone.utc)
+            if forecast_dt < start_dt or forecast_dt >= end_dt:
+                continue
+
+            day_key = forecast_dt.strftime("%Y-%m-%d")
+            bucket = daily.setdefault(
+                day_key,
+                {"precip": [], "temp": [], "humidity": [], "wind": []},
+            )
+
+            temp_raw = record["temp_raw"]
+            if temp_raw is not None:
+                bucket["temp"].append(_to_celsius(temp_raw))
+
+            humidity_raw = record["humidity_raw"]
+            if humidity_raw is not None:
+                bucket["humidity"].append(max(0.0, min(100.0, humidity_raw)))
+
+            wind_speed = record["wind_speed_raw"]
+            if wind_speed is None and record["u_wind_raw"] is not None and record["v_wind_raw"] is not None:
+                wind_speed = math.sqrt(record["u_wind_raw"] ** 2 + record["v_wind_raw"] ** 2)
+            if wind_speed is not None:
+                bucket["wind"].append(max(0.0, wind_speed))
+
+            precip_total = record["precip_total_raw"]
+            if precip_total is not None:
+                bucket["precip"].append(max(0.0, precip_total))
+            elif record["precip_rate_raw"] is not None:
+                step_seconds = record["step_hours"] * 3600.0
+                bucket["precip"].append(max(0.0, record["precip_rate_raw"] * step_seconds))
 
         forecast_timeseries: list[dict[str, Any]] = []
         wind_values: list[float] = []
-
         for day in range(14):
-            day_start = start_dt + timedelta(days=day)
-            day_end = day_start + timedelta(days=1)
-            day_collection = collection.filterDate(to_iso_z(day_start), to_iso_z(day_end))
-            if _safe_float(day_collection.size().getInfo()) == 0:
+            day_dt = start_dt + timedelta(days=day)
+            day_key = day_dt.strftime("%Y-%m-%d")
+            bucket = daily.get(day_key)
+            if not bucket or not bucket["temp"]:
                 continue
 
-            daily_precip_img = day_collection.select([precip_band]).sum()
-            daily_temp_img = day_collection.select([temp_band]).mean()
-
-            precip_mm = _region_mean(ee, daily_precip_img, centroid, scale=25_000)
-            temp_raw = _region_mean(ee, daily_temp_img, centroid, scale=25_000)
-
-            if precip_mm is None or temp_raw is None:
-                continue
-
-            humidity_pct = 65.0
-            if humidity_band:
-                hum_val = _region_mean(ee, day_collection.select([humidity_band]).mean(), centroid, scale=25_000)
-                if hum_val is not None:
-                    humidity_pct = max(0.0, min(100.0, hum_val))
-
-            wind_ms = 3.0
-            if wind_band:
-                wind_val = _region_mean(ee, day_collection.select([wind_band]).mean(), centroid, scale=25_000)
-                if wind_val is not None:
-                    wind_ms = max(0.0, wind_val)
-            elif u_wind_band and v_wind_band:
-                u_val = _region_mean(ee, day_collection.select([u_wind_band]).mean(), centroid, scale=25_000)
-                v_val = _region_mean(ee, day_collection.select([v_wind_band]).mean(), centroid, scale=25_000)
-                if u_val is not None and v_val is not None:
-                    wind_ms = max(0.0, math.sqrt(u_val**2 + v_val**2))
+            precip_mm = sum(bucket["precip"]) if bucket["precip"] else 0.0
+            temp_c = sum(bucket["temp"]) / len(bucket["temp"])
+            humidity_pct = (sum(bucket["humidity"]) / len(bucket["humidity"])) if bucket["humidity"] else 65.0
+            wind_ms = (sum(bucket["wind"]) / len(bucket["wind"])) if bucket["wind"] else 3.0
 
             wind_values.append(wind_ms)
             forecast_timeseries.append(
                 {
-                    "forecast_time": to_iso_z(day_start),
-                    "precip_mm": _round(max(0.0, precip_mm), 1),
-                    "temp_c": _round(_to_celsius(temp_raw), 1),
+                    "forecast_time": to_iso_z(day_dt),
+                    "precip_mm": _round(precip_mm, 1),
+                    "temp_c": _round(temp_c, 1),
                     "humidity_pct": _round(humidity_pct, 1),
                 }
             )
@@ -165,13 +212,14 @@ def _try_get_gee_climate_forecast(
         temp_max_7d_c = _round(max(point["temp_c"] for point in first_7d), 1)
         humidity_mean_7d_pct = _round(sum(point["humidity_pct"] for point in first_7d) / len(first_7d), 1)
         wind_mean_7d_ms = _round(sum(wind_values[:7]) / max(1, len(wind_values[:7])), 1)
+        run_ts_iso = datetime.fromtimestamp(latest_run_ms / 1000, tz=timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
 
         return {
             "source": "gee",
             "provider": "Google Earth Engine",
             "model": "NOAA/GFS0P25",
             "gee_status": gee_status,
-            "forecast_run_timestamp": to_iso_z(latest_gfs_run_timestamp(analysis_utc)),
+            "forecast_run_timestamp": run_ts_iso,
             "precip_forecast_7d_mm": precip_forecast_7d_mm,
             "precip_forecast_14d_mm": precip_forecast_14d_mm,
             "temp_mean_7d_c": temp_mean_7d_c,
@@ -264,4 +312,3 @@ def get_climate_forecast(
         if gee_data is not None:
             return gee_data
     return _get_synthetic_climate_forecast(spatial_context, analysis_timestamp)
-
