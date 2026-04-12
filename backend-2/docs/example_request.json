@@ -1,0 +1,37 @@
+{
+  "field_id": "talhao_01",
+  "property_name": "Fazenda Exemplo",
+  "culture": "soja",
+  "sowing_date": "2026-10-15",
+  "crop_stage": null,
+  "irrigated": false,
+  "analysis_timestamp": "2026-04-11T20:30:00Z",
+  "geometry": {
+    "type": "Polygon",
+    "coordinates": [
+      [
+        [
+          -55.8126,
+          -12.4321
+        ],
+        [
+          -55.7421,
+          -12.4321
+        ],
+        [
+          -55.7421,
+          -12.4888
+        ],
+        [
+          -55.8126,
+          -12.4888
+        ],
+        [
+          -55.8126,
+          -12.4321
+        ]
+      ]
+    ]
+  }
+}
+
