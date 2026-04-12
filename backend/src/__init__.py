@@ -1,0 +1,2 @@
+"""SafraViva backend package."""
+

@@ -1,0 +1,2136 @@
+{
+  "type": "FeatureCollection",
+  "name": "municipios_mt",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.31803578454013,
+          -15.177269348101715
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5100102,
+        "Município": "ACORIZAL",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.50025308122196,
+          -13.977564264645116
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5100201,
+        "Município": "ÁGUA BOA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.367708528770535,
+          -10.055804681892074
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5100250,
+        "Município": "ALTA FLORESTA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -53.4641901510374,
+          -17.426963358288415
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5100300,
+        "Município": "ALTO ARAGUAIA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -51.75022344129549,
+          -11.811502339166385
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5100359,
+        "Município": "ALTO BOA VISTA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -53.580974516364265,
+          -16.88830501994177
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5100409,
+        "Município": "ALTO GARÇAS",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.661241712234975,
+          -14.75979737394771
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5100508,
+        "Município": "ALTO PARAGUAI",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -53.33485037955338,
+          -17.826168919060677
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5100607,
+        "Município": "ALTO TAQUARI",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -57.8259919846189,
+          -8.758661102645437
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5100805,
+        "Município": "APIACÁS",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -51.80670519105423,
+          -15.13028818805938
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5101001,
+        "Município": "ARAGUAIANA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -53.12127538628652,
+          -16.75051538134318
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5101209,
+        "Município": "ARAGUAINHA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -58.45910265638874,
+          -15.253016280204058
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5101258,
+        "Município": "ARAPUTANGA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.85934158129751,
+          -14.50709103389108
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5101308,
+        "Município": "ARENÁPOLIS",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -59.85630769276447,
+          -10.179663938680896
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5101407,
+        "Município": "ARIPUANÃ",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.02952144967245,
+          -16.810379185440677
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5101605,
+        "Município": "BARÃO DE MELGAÇO",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -57.559572197819264,
+          -15.06775988214489
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5101704,
+        "Município": "BARRA DO BUGRES",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.442743039819966,
+          -15.363068300795764
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5101803,
+        "Município": "BARRA DO GARÇAS",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.94174297100683,
+          -13.46319793731044
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5101837,
+        "Município": "BOA ESPERANÇA DO NORTE",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -51.73947799515019,
+          -12.217808976596906
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5101852,
+        "Município": "BOM JESUS DO ARAGUAIA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -57.99883674281112,
+          -12.423103822774973
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5101902,
+        "Município": "BRASNORTE",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -57.833538356948814,
+          -16.53753883897078
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5102504,
+        "Município": "CÁCERES",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -53.12838097485134,
+          -14.374608011930542
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5102603,
+        "Município": "CAMPINÁPOLIS",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -57.93095334788996,
+          -13.688299609940218
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5102637,
+        "Município": "CAMPO NOVO DO PARECIS",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.95807762520933,
+          -15.34475846667672
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5102678,
+        "Município": "CAMPO VERDE",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -59.19305440617806,
+          -13.579846013329773
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5102686,
+        "Município": "CAMPOS DE JÚLIO",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -51.82363386798856,
+          -11.201583088321472
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5102694,
+        "Município": "CANABRAVA DO NORTE",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.39891540525291,
+          -13.329839413637654
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5102702,
+        "Município": "CANARANA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -55.83415923693518,
+          -10.106383085871643
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5102793,
+        "Município": "CARLINDA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -58.602797238568925,
+          -10.940726042838836
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5102850,
+        "Município": "CASTANHEIRA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -55.55214646743134,
+          -15.121008970802643
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5103007,
+        "Município": "CHAPADA DOS GUIMARÃES",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -55.04769829672835,
+          -11.448154663922145
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5103056,
+        "Município": "CLÁUDIA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -51.14844623139371,
+          -13.869823002557183
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5103106,
+        "Município": "COCALINHO",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -55.46858407769784,
+          -10.630984877592924
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5103205,
+        "Município": "COLÍDER",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -60.30419403602567,
+          -9.29244055754031
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5103254,
+        "Município": "COLNIZA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -59.75136487419924,
+          -13.193665226029982
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5103304,
+        "Município": "COMODORO",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -51.69857243990644,
+          -10.40416679483967
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5103353,
+        "Município": "CONFRESA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -59.332236226492775,
+          -14.634682035529794
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5103361,
+        "Município": "CONQUISTA D'OESTE",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -58.67515452853943,
+          -9.537854007105889
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5103379,
+        "Município": "COTRIGUAÇU",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -55.81821473864746,
+          -15.592785693548104
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5103403,
+        "Município": "CUIABÁ",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -57.87643739635909,
+          -15.617106138999752
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5103437,
+        "Município": "CURVELÂNDIA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.96161613492687,
+          -14.730076089594045
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5103452,
+        "Município": "DENISE",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.80456869646227,
+          -14.095738291721403
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5103502,
+        "Município": "DIAMANTINO",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.77652799320202,
+          -15.656315393451228
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5103601,
+        "Município": "DOM AQUINO",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.184803864981006,
+          -11.932901239901264
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5103700,
+        "Município": "FELIZ NATAL",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -58.70257463676583,
+          -15.527386375027762
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5103809,
+        "Município": "FIGUEIRÓPOLIS D'OESTE",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -53.45617697314303,
+          -12.995961584847429
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5103858,
+        "Município": "GAÚCHA DO NORTE",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -53.342801478791,
+          -15.520137728086626
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5103908,
+        "Município": "GENERAL CARNEIRO",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -58.32529256020067,
+          -15.839196553851233
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5103957,
+        "Município": "GLÓRIA D'OESTE",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.62110526572029,
+          -9.776268672314474
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5104104,
+        "Município": "GUARANTÃ DO NORTE",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -53.59004736514604,
+          -16.38475748964639
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5104203,
+        "Município": "GUIRATINGA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -58.59759197412852,
+          -15.33520191984986
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5104500,
+        "Município": "INDIAVAÍ",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.05865921012267,
+          -12.017026207397487
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5104526,
+        "Município": "IPIRANGA DO NORTE",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.75487811621194,
+          -12.140392183725607
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5104542,
+        "Município": "ITANHANGÁ",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -55.58981127253703,
+          -11.110991791417936
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5104559,
+        "Município": "ITAÚBA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.59732059708032,
+          -17.333887812264262
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5104609,
+        "Município": "ITIQUIRA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -55.19194931702728,
+          -15.975734986156777
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5104807,
+        "Município": "JACIARA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.57273988795239,
+          -15.337843506045838
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5104906,
+        "Município": "JANGADA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -58.86566572033241,
+          -15.30479478250012
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5105002,
+        "Município": "JAURU",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -57.6184029201745,
+          -11.023732245661098
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5105101,
+        "Município": "JUARA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -59.32449525976136,
+          -11.532094662396393
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5105150,
+        "Município": "JUÍNA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -58.62482561277473,
+          -10.397452410016324
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5105176,
+        "Município": "JURUENA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.90422475203739,
+          -16.182877936434394
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5105200,
+        "Município": "JUSCIMEIRA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -57.77917724976924,
+          -15.37706204665728
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5105234,
+        "Município": "LAMBARI D'OESTE",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.16745525453017,
+          -13.037262682275824
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5105259,
+        "Município": "LUCAS DO RIO VERDE",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -50.945799463815696,
+          -11.014675147649845
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5105309,
+        "Município": "LUCIARA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.05341565680851,
+          -10.886264117377673
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5105580,
+        "Município": "MARCELÂNDIA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.35687452113759,
+          -10.01397576867278
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5105606,
+        "Município": "MATUPÁ",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -58.05495940492546,
+          -15.65415619178349
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5105622,
+        "Município": "MIRASSOL D'OESTE",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -55.81247901312272,
+          -14.376970636350492
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5105903,
+        "Município": "NOBRES",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.72249293875559,
+          -14.347737218871607
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106000,
+        "Município": "NORTELÂNDIA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.49115895939667,
+          -15.848476513879344
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106109,
+        "Município": "NOSSA SENHORA DO LIVRAMENTO",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -58.076941272688266,
+          -9.76844110547214
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106158,
+        "Município": "NOVA BANDEIRANTES",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -55.05083807095621,
+          -14.784437664954506
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106208,
+        "Município": "NOVA BRASILÂNDIA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.041727903115394,
+          -10.700279072477024
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106216,
+        "Município": "NOVA CANAÃ DO NORTE",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -55.3381782807674,
+          -10.293863147124693
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5108808,
+        "Município": "NOVA GUARITA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -59.77145731305889,
+          -14.299833487320436
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106182,
+        "Município": "NOVA LACERDA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -57.2574437207568,
+          -14.290429747883556
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5108857,
+        "Município": "NOVA MARILÂNDIA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -57.220274250289805,
+          -12.783863063266468
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5108907,
+        "Município": "NOVA MARINGÁ",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -57.24565622040054,
+          -9.970185722895732
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5108956,
+        "Município": "NOVA MONTE VERDE",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.10605426682656,
+          -13.629599068171858
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106224,
+        "Município": "NOVA MUTUM",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -51.88994973343767,
+          -14.156237630600444
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106174,
+        "Município": "NOVA NAZARÉ",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -57.421451294422575,
+          -14.804433277791752
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106232,
+        "Município": "NOVA OLÍMPIA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.90666915766682,
+          -10.918919878230266
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106190,
+        "Município": "NOVA SANTA HELENA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.716413021528616,
+          -12.79247178424838
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106240,
+        "Município": "NOVA UBIRATÃ",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.40682134423187,
+          -14.596970993272922
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106257,
+        "Município": "NOVA XAVANTINA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -57.30351868927257,
+          -11.383601539728843
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106273,
+        "Município": "NOVO HORIZONTE DO NORTE",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -55.40368080814789,
+          -9.752155084217884
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106265,
+        "Município": "NOVO MUNDO",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -50.88794647799478,
+          -12.313386361377171
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106315,
+        "Município": "NOVO SANTO ANTÔNIO",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -53.258480567711686,
+          -15.07810240510565
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106281,
+        "Município": "NOVO SÃO JOAQUIM",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.68258880134641,
+          -9.593574356511173
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106299,
+        "Município": "PARANAITA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.10727131184314,
+          -13.677585783630573
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106307,
+        "Município": "PARANATINGA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.24920776836923,
+          -16.795172586036248
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106372,
+        "Município": "PEDRA PRETA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -53.59394714840439,
+          -10.149515061625676
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106422,
+        "Município": "PEIXOTO DE AZEVEDO",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.67396753930485,
+          -14.588782368756265
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106455,
+        "Município": "PLANALTO DA SERRA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.94777664432655,
+          -16.79092144842028
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106505,
+        "Município": "POCONÉ",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.72139944163438,
+          -15.931955954688462
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106653,
+        "Município": "PONTAL DO ARAGUAIA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.93657485465432,
+          -16.65894998156077
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106703,
+        "Município": "PONTE BRANCA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -59.45774230047186,
+          -15.516822636766353
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106752,
+        "Município": "PONTES E LACERDA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -51.71357883371733,
+          -10.82617099792794
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106778,
+        "Município": "PORTO ALEGRE DO NORTE",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.745698348397525,
+          -11.734958209812218
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106802,
+        "Município": "PORTO DOS GAÚCHOS",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -58.98236116797779,
+          -15.956674139424358
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106828,
+        "Município": "PORTO ESPERIDIÃO",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -57.21550456086604,
+          -15.52117637953788
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5106851,
+        "Município": "PORTO ESTRELA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.18601877504531,
+          -15.851006114121144
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107008,
+        "Município": "POXORÉU",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.21995435201276,
+          -15.096682756063087
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107040,
+        "Município": "PRIMAVERA DO LESTE",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.74343691907286,
+          -12.158719562613086
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107065,
+        "Município": "QUERÊNCIA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -58.45777994242834,
+          -14.928428788669905
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107156,
+        "Município": "RESERVA DO CABAÇAL",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -51.56833100897817,
+          -12.8747538773544
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107180,
+        "Município": "RIBEIRÃO CASCALHEIRA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.75977638490882,
+          -16.494009996477534
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107198,
+        "Município": "RIBEIRÃOZINHO",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -58.14977249051035,
+          -15.272967107742756
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107206,
+        "Município": "RIO BRANCO",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -61.00996585034101,
+          -10.46305976471472
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107578,
+        "Município": "RONDOLÂNDIA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.68482110878328,
+          -16.567477529020824
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107602,
+        "Município": "RONDONÓPOLIS",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -55.93658651830288,
+          -14.764343291301431
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107701,
+        "Município": "ROSÁRIO OESTE",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -58.05085561031439,
+          -15.050859693909114
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107750,
+        "Município": "SALTO DO CÉU",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.89969588879439,
+          -11.934663389331565
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107248,
+        "Município": "SANTA CARMEM",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.54146298669247,
+          -10.064499014825012
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107743,
+        "Município": "SANTA CRUZ DO XINGU",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -55.29362133978485,
+          -13.833721467983198
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107768,
+        "Município": "SANTA RITA DO TRIVELATO",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -50.79231392822395,
+          -10.332638179491056
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107776,
+        "Município": "SANTA TEREZINHA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -57.34672492567787,
+          -14.450329247237905
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107263,
+        "Município": "SANTO AFONSO",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -53.6699272648282,
+          -14.805150075268578
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107792,
+        "Município": "SANTO ANTÔNIO DO LESTE",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -55.45042948001871,
+          -16.532635592506754
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107800,
+        "Município": "SANTO ANTÔNIO DO LEVERGER",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -51.96959948961928,
+          -11.454590419789138
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107859,
+        "Município": "SÃO FÉLIX DO ARAGUAIA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.26808228977183,
+          -16.470955730450203
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107297,
+        "Município": "SÃO JOSÉ DO POVO",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.8081878318963,
+          -13.551233876149215
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107305,
+        "Município": "SÃO JOSÉ DO RIO CLARO",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.61691852499549,
+          -10.69645312866716
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107354,
+        "Município": "SÃO JOSÉ DO XINGU",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -58.29711455066039,
+          -15.566563549719378
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107107,
+        "Município": "SÃO JOSÉ DOS QUATRO MARCOS",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.740304335419154,
+          -15.95407348733945
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107404,
+        "Município": "SÃO PEDRO DA CIPA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -58.65354990743798,
+          -13.154436365257764
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107875,
+        "Município": "SAPEZAL",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -51.36209771499205,
+          -12.023007024053626
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107883,
+        "Município": "SERRA NOVA DOURADA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -55.50151903605955,
+          -11.710854126762824
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107909,
+        "Município": "SINOP",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -55.72295790619007,
+          -12.668007724595446
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107925,
+        "Município": "SORRISO",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.496442029462,
+          -11.214129482133364
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107941,
+        "Município": "TABAPORÃ",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -58.29145216454499,
+          -14.430610028761617
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5107958,
+        "Município": "TANGARÁ DA SERRA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.531764272497256,
+          -12.568008595776458
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5108006,
+        "Município": "TAPURAH",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.984062014981326,
+          -10.512562245155577
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5108055,
+        "Município": "TERRA NOVA DO NORTE",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -53.456380346409375,
+          -15.906647177053056
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5108105,
+        "Município": "TESOURO",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -52.88992899193632,
+          -16.29473132231953
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5108204,
+        "Município": "TORIXORÉU",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -54.316447283520105,
+          -11.527675995298992
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5108303,
+        "Município": "UNIÃO DO SUL",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -58.963065651265545,
+          -14.96599764977174
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5108352,
+        "Município": "VALE DE SÃO DOMINGOS",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -56.289263827405264,
+          -15.55607535592405
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5108402,
+        "Município": "VÁRZEA GRANDE",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -55.34554860677734,
+          -12.418767722154127
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5108501,
+        "Município": "VERA",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -59.99083159888764,
+          -15.19062240339415
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5105507,
+        "Município": "VILA BELA DA SANTÍSSIMA TRINDADE",
+        "UF": "MT"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [
+          -51.406349763360886,
+          -9.980647438088546
+        ]
+      },
+      "properties": {
+        "Geocodigo": 5108600,
+        "Município": "VILA RICA",
+        "UF": "MT"
+      }
+    }
+  ]
+}

@@ -1,0 +1,58 @@
+{
+  "field_info": {
+    "field_id": "talhao_01",
+    "property_name": "Fazenda Exemplo",
+    "culture": "soja",
+    "municipio": "Sorriso",
+    "uf": "MT",
+    "area_ha": 124.8,
+    "irrigated": false
+  },
+  "summary": {
+    "risk_score": 78,
+    "risk_level": "alto",
+    "primary_alert": "Risco elevado de estresse hídrico nos próximos 10 dias.",
+    "recommended_action": "Priorizar monitoramento e irrigação nos talhões mais sensíveis.",
+    "analysis_timestamp": "2026-04-11T20:30:00Z",
+    "forecast_run_timestamp": "2026-04-11T18:00:00Z"
+  },
+  "metrics": {
+    "precip_forecast_7d_mm": 18.4,
+    "precip_forecast_14d_mm": 42.7,
+    "temp_mean_7d_c": 28.1,
+    "temp_max_7d_c": 34.6,
+    "humidity_mean_7d_pct": 61.2
+  },
+  "risk_flags": {
+    "dry_risk_flag": true,
+    "heat_risk_flag": true,
+    "outside_zarc_flag": false,
+    "vegetation_stress_flag": true
+  },
+  "forecast_timeseries": [
+    {
+      "forecast_time": "2026-04-12T00:00:00Z",
+      "precip_mm": 1.1,
+      "temp_c": 23.6,
+      "humidity_pct": 87.2
+    }
+  ],
+  "map_layer": {
+    "geometry": {
+      "type": "Polygon",
+      "coordinates": [[[0, 0], [1, 0], [1, 1], [0, 0]]]
+    },
+    "fill_color": "#ef4444",
+    "stroke_color": "#991b1b",
+    "tooltip_summary": "Risco alto | soja | precipitação baixa nos próximos 7 dias"
+  },
+  "copilot_response": {
+    "summary": "Esta área apresenta risco alto para a cultura soja no curto prazo.",
+    "why": [
+      "Baixa precipitação prevista.",
+      "Temperaturas elevadas na janela de 7 dias.",
+      "Maior vulnerabilidade da área no contexto territorial."
+    ],
+    "action": "Priorize monitoramento e manejo hídrico nesta área."
+  }
+}
