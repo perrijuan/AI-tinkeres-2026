@@ -1,3 +1,9 @@
+# Env files (nunca commitar — use .env.example como referência)
+.env
+.env.local
+.env.production
+.env.*.local
+
 .venv
 __pycache__
 *.pyc
