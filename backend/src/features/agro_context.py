@@ -3,6 +3,7 @@ import unicodedata
 from datetime import date, datetime
 from typing import Any
 
+from src.features.soil_context import get_soil_context
 from src.features.zarc_lookup import get_zarc_context
 from src.utils.time import ensure_utc
 
@@ -40,6 +41,10 @@ def _normalize_text(value: str) -> str:
 def _hash_ratio(seed_text: str) -> float:
     digest = hashlib.sha256(seed_text.encode("utf-8")).hexdigest()
     return int(digest[:8], 16) / 0xFFFFFFFF
+
+
+def _clamp(value: float, lower: float, upper: float) -> float:
+    return max(lower, min(upper, value))
 
 
 def _in_zarc_window(sowing_date: date, windows: list[tuple[str, str]]) -> bool:
@@ -96,6 +101,87 @@ def _build_fallback_territorial_context(spatial_context: dict[str, Any]) -> dict
     }
 
 
+def _summarize_ndvi_dynamics(territorial_context: dict[str, Any]) -> dict[str, Any]:
+    timeseries = list(territorial_context.get("ndvi_timeseries", []))
+    timeseries = [point for point in timeseries if point.get("ndvi") is not None]
+    latest_ndvi = territorial_context.get("ndvi")
+    if latest_ndvi is None and timeseries:
+        latest_ndvi = timeseries[-1].get("ndvi")
+
+    ndvi_delta_30d = 0.0
+    ndvi_anomaly = 0.0
+    ndvi_trend = "stable"
+
+    if latest_ndvi is not None and len(timeseries) >= 2:
+        ref_ndvi = float(timeseries[0]["ndvi"])
+        ndvi_delta_30d = round(float(latest_ndvi) - ref_ndvi, 3)
+        baseline_values = [float(point["ndvi"]) for point in timeseries[:-1]]
+        baseline = sum(baseline_values) / max(1, len(baseline_values))
+        ndvi_anomaly = round(float(latest_ndvi) - baseline, 3)
+    elif latest_ndvi is not None:
+        ndvi_anomaly = round(float(latest_ndvi) - 0.55, 3)
+
+    if ndvi_delta_30d <= -0.05:
+        ndvi_trend = "decreasing"
+    elif ndvi_delta_30d >= 0.05:
+        ndvi_trend = "increasing"
+
+    ndvi_drop_flag = ndvi_delta_30d <= -0.05 or ndvi_anomaly <= -0.06
+    return {
+        "ndvi_delta_30d": ndvi_delta_30d,
+        "ndvi_anomaly": ndvi_anomaly,
+        "ndvi_trend": ndvi_trend,
+        "ndvi_drop_flag": ndvi_drop_flag,
+    }
+
+
+def _merge_soil_with_territory(
+    territorial_context: dict[str, Any],
+    soil_context: dict[str, Any],
+) -> dict[str, Any]:
+    merged = dict(territorial_context)
+    merged["soil_context"] = soil_context
+    merged["soil_quality_index"] = soil_context["soil_quality_index"]
+    merged["soil_quality_label"] = soil_context["soil_quality_label"]
+    merged["soil_good_flag"] = soil_context["soil_good_flag"]
+    merged["soil_sample_count"] = soil_context["sample_count"]
+    merged["soil_nearest_sample_km"] = soil_context["nearest_sample_km"]
+
+    ndvi_dynamics = _summarize_ndvi_dynamics(merged)
+    merged.update(ndvi_dynamics)
+    merged["vegetation_mismatch_flag"] = bool(ndvi_dynamics["ndvi_drop_flag"] and soil_context["soil_good_flag"])
+    merged["stress_mismatch_index"] = round(
+        _clamp(
+            max(0.0, -ndvi_dynamics["ndvi_delta_30d"]) * (0.5 + (soil_context["soil_quality_index"] * 0.5)),
+            0.0,
+            1.0,
+        ),
+        3,
+    )
+
+    current_soil_buffer = float(merged.get("soil_water_buffer_index", 0.5))
+    blended_soil_buffer = round(_clamp((current_soil_buffer * 0.6) + (soil_context["soil_quality_index"] * 0.4), 0.0, 1.0), 3)
+    merged["soil_water_buffer_index"] = blended_soil_buffer
+
+    vegetation_stress = float(merged.get("vegetation_stress_index", 0.5))
+    vulnerability = round(
+        _clamp((vegetation_stress * 0.55) + ((1.0 - blended_soil_buffer) * 0.45), 0.0, 1.0),
+        3,
+    )
+    if merged["vegetation_mismatch_flag"]:
+        vulnerability = round(_clamp(vulnerability + 0.08, 0.0, 1.0), 3)
+    merged["vulnerability_index"] = vulnerability
+
+    signals = list(merged.get("signals", []))
+    signals.extend(soil_context.get("signals", []))
+    signals.append(f"Tendencia NDVI recente: {ndvi_dynamics['ndvi_trend']}.")
+    signals.append(f"Delta NDVI (janela recente): {ndvi_dynamics['ndvi_delta_30d']}.")
+    if merged["vegetation_mismatch_flag"]:
+        signals.append("Mismatch NDVI-solo detectado: vegetacao em queda com solo potencialmente favoravel.")
+    merged["signals"] = signals
+    return merged
+
+
 def get_agro_context(
     inputs: dict[str, Any],
     spatial_context: dict[str, Any],
@@ -128,6 +214,8 @@ def get_agro_context(
         yield_trend = "alta"
 
     territorial_context = territorial_context_override or _build_fallback_territorial_context(spatial_context)
+    soil_context = get_soil_context(spatial_context)
+    territorial_context = _merge_soil_with_territory(territorial_context, soil_context)
 
     return {
         "culture": culture,
@@ -143,5 +231,6 @@ def get_agro_context(
             "yield_volatility": yield_volatility,
             "yield_trend": yield_trend,
         },
+        "soil_context": soil_context,
         "territorial_context": territorial_context,
     }

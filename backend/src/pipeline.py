@@ -5,6 +5,7 @@ from src.features.agro_context import get_agro_context
 from src.features.map_layer import build_map_layer
 from src.features.response_builder import build_frontend_response
 from src.ingest.climate_forecast import get_climate_forecast
+from src.ingest.climate_history import get_climate_history
 from src.ingest.territorial_context import get_territorial_context
 from src.ingest.spatial_context import derive_spatial_context
 from src.scoring.alerts import generate_alerts_and_recommendations
@@ -29,6 +30,11 @@ def analyze_field(payload: Any) -> dict[str, Any]:
         inputs["analysis_timestamp"],
         geometry=inputs.get("geometry"),
     )
+    climate_history = get_climate_history(
+        spatial_context=spatial_context,
+        analysis_timestamp=inputs["analysis_timestamp"],
+        geometry=inputs.get("geometry"),
+    )
     territorial_context = get_territorial_context(
         geometry=inputs["geometry"],
         spatial_context=spatial_context,
@@ -39,14 +45,15 @@ def analyze_field(payload: Any) -> dict[str, Any]:
         spatial_context,
         territorial_context_override=territorial_context,
     )
-    risk_result = calculate_risk_score(climate_data, agro_context)
-    alert_data = generate_alerts_and_recommendations(risk_result, climate_data, agro_context)
+    risk_result = calculate_risk_score(climate_data, agro_context, climate_history=climate_history)
+    alert_data = generate_alerts_and_recommendations(risk_result, climate_data, agro_context, climate_history=climate_history)
     map_layer = build_map_layer(inputs, risk_result)
 
     return build_frontend_response(
         inputs=inputs,
         spatial_context=spatial_context,
         climate_data=climate_data,
+        climate_history=climate_history,
         agro_context=agro_context,
         risk_result=risk_result,
         alert_data=alert_data,
