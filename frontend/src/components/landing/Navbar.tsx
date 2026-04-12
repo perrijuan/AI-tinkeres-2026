@@ -10,7 +10,7 @@ import {
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-import { Menu, Leaf } from "lucide-react"
+import { Menu } from "lucide-react"
 import { cn } from "@/lib/utils"
 
 const navLinks = [
@@ -42,9 +42,11 @@ export default function Navbar() {
     >
       <nav className="container mx-auto max-w-7xl px-4 h-16 flex items-center justify-between">
         <a href="/" className="flex items-center gap-2.5">
-          <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shrink-0">
-            <Leaf className="w-4 h-4 text-primary-foreground" />
-          </div>
+          <img
+            src="/logo.jpeg"
+            alt="Logo SafraViva"
+            className="h-8 w-8 shrink-0 rounded-lg object-cover"
+          />
           <div className="leading-none">
             <span
               className={cn(
@@ -106,9 +108,11 @@ export default function Navbar() {
             </SheetTrigger>
             <SheetContent side="right" className="w-72">
               <div className="flex items-center gap-2.5 mb-6 mt-2">
-                <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center">
-                  <Leaf className="w-4 h-4 text-primary-foreground" />
-                </div>
+                <img
+                  src="/logo.jpeg"
+                  alt="Logo SafraViva"
+                  className="h-8 w-8 rounded-lg object-cover"
+                />
                 <span className="font-bold text-base">SafraViva</span>
               </div>
               <Separator className="mb-4" />

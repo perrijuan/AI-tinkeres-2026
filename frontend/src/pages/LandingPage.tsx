@@ -5,9 +5,8 @@ import ProblemSection from "@/components/landing/ProblemSection"
 import SolutionSection from "@/components/landing/SolutionSection"
 import HowItWorksSection from "@/components/landing/HowItWorksSection"
 import AudienceSection from "@/components/landing/AudienceSection"
-import MarketSection from "@/components/landing/MarketSection"
-import PricingSection from "@/components/landing/PricingSection"
 import ImpactSection from "@/components/landing/ImpactSection"
+import FAQSection from "@/components/landing/FAQSection"
 import CTASection from "@/components/landing/CTASection"
 import Footer from "@/components/landing/Footer"
 
@@ -22,10 +21,11 @@ export default function LandingPage() {
         <SolutionSection />
         <HowItWorksSection />
         <AudienceSection />
-        <MarketSection />
-        <PricingSection />
         <ImpactSection />
-        <CTASection />
+        <FAQSection />
+        <div id="contato">
+          <CTASection />
+        </div>
       </main>
       <Footer />
     </div>

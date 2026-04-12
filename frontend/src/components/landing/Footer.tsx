@@ -1,6 +1,5 @@
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
-import { Leaf } from "lucide-react"
 
 const links = {
   Produto: [
@@ -20,10 +19,11 @@ export default function Footer() {
         <div className="grid md:grid-cols-4 gap-10 mb-12">
           <div className="space-y-4">
             <div className="flex items-center gap-2.5">
-              {/* bg-primary text-primary-foreground — reactivo ao tema */}
-              <div className="w-8 h-8 bg-primary rounded-lg flex items-center justify-center shrink-0">
-                <Leaf className="w-4 h-4 text-primary-foreground" />
-              </div>
+              <img
+                src="/logo.jpeg"
+                alt="Logo SafraViva"
+                className="h-8 w-8 shrink-0 rounded-lg object-cover"
+              />
               <span className="font-bold text-white text-base">SafraViva</span>
             </div>
             <p className="text-sm leading-relaxed">

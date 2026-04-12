@@ -17,7 +17,6 @@ import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
 import { API_ENDPOINTS } from "@/config"
 import {
-  Leaf,
   ArrowLeft,
   ArrowRight,
   Undo2,
@@ -168,9 +167,11 @@ export default function DemoPage() {
       <header className="shrink-0 border-b bg-background/95 backdrop-blur-sm z-50">
         <div className="h-14 px-6 flex items-center justify-between max-w-7xl mx-auto w-full">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-primary rounded-lg flex items-center justify-center">
-              <Leaf className="w-3.5 h-3.5 text-primary-foreground" />
-            </div>
+            <img
+              src="/logo.jpeg"
+              alt="Logo SafraViva"
+              className="h-7 w-7 rounded-lg object-cover"
+            />
             <span className="font-bold text-sm">SafraViva</span>
           </Link>
 

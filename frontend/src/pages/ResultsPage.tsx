@@ -15,7 +15,6 @@ import {
 import { MapContainer, TileLayer, Polygon } from "react-leaflet"
 import "leaflet/dist/leaflet.css"
 import {
-  Leaf,
   ArrowLeft,
   CloudRain,
   Thermometer,
@@ -34,6 +33,14 @@ import {
   Loader2,
   Maximize2,
   Minimize2,
+  CalendarRange,
+  MapPinned,
+  ShieldAlert,
+  ShieldCheck,
+  Activity,
+  CircleHelp,
+  Sparkles,
+  Bot,
 } from "lucide-react"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -44,6 +51,12 @@ import {
   CollapsibleContent,
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
+import {
+  Tooltip as InfoTooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip"
 import { cn } from "@/lib/utils"
 import { API_ENDPOINTS } from "@/config"
 import ReactMarkdown from "react-markdown"
@@ -130,6 +143,17 @@ interface ChatMessage {
   content: string
 }
 
+const LOADING_MESSAGES = [
+  "Analisando o polígono da área e validando o recorte territorial…",
+  "Consultando sinais climáticos para os próximos 14 dias…",
+  "Processando indicadores de satélite e vigor da vegetação…",
+  "Conferindo aderência à janela ZARC para a cultura informada…",
+  "Calculando score de risco e organizando alertas principais…",
+  "Montando o resumo da Safrinia para facilitar a leitura da área…",
+]
+
+const MIN_LOADING_MS = 3000
+
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const RISK_CONFIG: Record<string, { label: string; color: string; bg: string; border: string; scoreColor: string }> = {
@@ -168,6 +192,53 @@ function stageName(id: string) {
     maturacao: "Maturação",
   }
   return map[id] ?? id
+}
+
+function fmtValue(value: number, digits = 0) {
+  return value.toLocaleString("pt-BR", {
+    minimumFractionDigits: digits,
+    maximumFractionDigits: digits,
+  })
+}
+
+function clamp(value: number, min: number, max: number) {
+  return Math.max(min, Math.min(max, value))
+}
+
+function riskTone(active: boolean) {
+  return active
+    ? "bg-red-50 text-red-700 border-red-200"
+    : "bg-emerald-50 text-emerald-700 border-emerald-200"
+}
+
+function normalizeMetric(value: number, max: number) {
+  return clamp((value / max) * 100, 6, 100)
+}
+
+function forecastLabel(precip: number, temp: number) {
+  if (precip < 3 && temp >= 33) return "Mais crítico"
+  if (precip < 5) return "Seco"
+  if (temp >= 32) return "Calor"
+  return "Estável"
+}
+
+function HelpTooltip({ text }: { text: string }) {
+  return (
+    <InfoTooltip>
+      <TooltipTrigger asChild>
+        <button
+          type="button"
+          className="inline-flex h-5 w-5 items-center justify-center rounded-full text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
+          aria-label="Explicar este bloco"
+        >
+          <CircleHelp className="h-3.5 w-3.5" />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="top" sideOffset={8} className="max-w-64">
+        <p className="text-xs leading-relaxed">{text}</p>
+      </TooltipContent>
+    </InfoTooltip>
+  )
 }
 
 // ── Sub-componentes ───────────────────────────────────────────────────────────
@@ -273,6 +344,136 @@ function SourceCard({
         </CollapsibleContent>
       </Card>
     </Collapsible>
+  )
+}
+
+function SignalMeter({
+  label,
+  value,
+  unit,
+  progress,
+  tone = "neutral",
+  hint,
+}: {
+  label: string
+  value: string
+  unit?: string
+  progress: number
+  tone?: "neutral" | "alert" | "good"
+  hint?: string
+}) {
+  const toneClass =
+    tone === "alert"
+      ? "bg-red-500"
+      : tone === "good"
+        ? "bg-emerald-500"
+        : "bg-primary"
+
+  return (
+    <div className="space-y-2 rounded-xl border bg-card/70 p-3">
+      <div className="flex items-start justify-between gap-3">
+        <div>
+          <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
+          <p className="text-lg font-semibold">
+            {value}
+            {unit && <span className="ml-1 text-sm font-normal text-muted-foreground">{unit}</span>}
+          </p>
+        </div>
+        {hint && (
+          <span className="max-w-26 text-right text-[11px] leading-tight text-muted-foreground">{hint}</span>
+        )}
+      </div>
+      <div className="h-2 overflow-hidden rounded-full bg-muted">
+        <div className={cn("h-full rounded-full transition-all", toneClass)} style={{ width: `${progress}%` }} />
+      </div>
+    </div>
+  )
+}
+
+function SummaryPanel({
+  title,
+  description,
+  icon: Icon,
+  tone = "neutral",
+}: {
+  title: string
+  description: string
+  icon: React.ElementType
+  tone?: "neutral" | "alert" | "good"
+}) {
+  const toneClass =
+    tone === "alert"
+      ? "bg-red-50 border-red-200"
+      : tone === "good"
+        ? "bg-emerald-50 border-emerald-200"
+        : "bg-card border-border"
+
+  const iconTone =
+    tone === "alert"
+      ? "text-red-600 bg-red-100"
+      : tone === "good"
+        ? "text-emerald-600 bg-emerald-100"
+        : "text-primary bg-primary/10"
+
+  return (
+    <div className={cn("rounded-xl border p-3", toneClass)}>
+      <div className="mb-2 flex items-center gap-2">
+        <div className={cn("rounded-lg p-2", iconTone)}>
+          <Icon className="h-4 w-4" />
+        </div>
+        <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">{title}</p>
+      </div>
+      <p className="text-sm leading-relaxed text-foreground">{description}</p>
+    </div>
+  )
+}
+
+function ForecastTable({
+  points,
+}: {
+  points: AnalysisData["forecast_timeseries"]
+}) {
+  const rows = points.slice(0, 5)
+
+  return (
+    <div className="overflow-hidden rounded-xl border">
+      <table className="w-full text-left text-sm">
+        <thead className="bg-muted/50 text-[11px] uppercase tracking-wide text-muted-foreground">
+          <tr>
+            <th className="px-3 py-2 font-medium">Dia</th>
+            <th className="px-3 py-2 font-medium">Chuva</th>
+            <th className="px-3 py-2 font-medium">Temp.</th>
+            <th className="px-3 py-2 font-medium">Umidade</th>
+            <th className="px-3 py-2 font-medium">Leitura</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rows.map((row) => {
+            const label = forecastLabel(row.precip_mm, row.temp_c)
+            const labelClass =
+              label === "Mais crítico"
+                ? "bg-red-50 text-red-700"
+                : label === "Seco" || label === "Calor"
+                  ? "bg-amber-50 text-amber-700"
+                  : "bg-emerald-50 text-emerald-700"
+
+            return (
+              <tr key={row.forecast_time} className="border-t first:border-t-0">
+                <td className="px-3 py-2 font-medium">{fmtDate(row.forecast_time)}</td>
+                <td className="px-3 py-2">{fmtValue(row.precip_mm, 1)} mm</td>
+                <td className="px-3 py-2">{fmtValue(row.temp_c, 1)} °C</td>
+                <td className="px-3 py-2">{fmtValue(row.humidity_pct, 0)}%</td>
+                <td className="px-3 py-2">
+                  <span className={cn("rounded-full px-2 py-1 text-[11px] font-medium", labelClass)}>
+                    {label}
+                  </span>
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
   )
 }
 
@@ -428,20 +629,83 @@ function ChatPanel({
 
 export default function ResultsPage() {
   const location = useLocation()
-  const [data, setData] = useState<AnalysisData | null>(
+  const initialAnalysis =
     (location.state as { analysis?: AnalysisData } | null)?.analysis ?? null
-  )
-  const [loading, setLoading] = useState(!data)
+  const [data, setData] = useState<AnalysisData | null>(null)
+  const [loading, setLoading] = useState(true)
   const [chatOpen, setChatOpen] = useState(false)
   const [chatFullscreen, setChatFullscreen] = useState(false)
+  const [loadingStep, setLoadingStep] = useState(0)
+  const [typedLoadingText, setTypedLoadingText] = useState("")
 
   useEffect(() => {
-    if (data) return
-    fetch(API_ENDPOINTS.mockAnalysis, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" })
-      .then((r) => r.json())
-      .then((d) => { setData(d); setLoading(false) })
-      .catch(() => setLoading(false))
-  }, [data])
+    const interval = window.setInterval(() => {
+      setLoadingStep((prev) => (prev + 1) % LOADING_MESSAGES.length)
+    }, 1200)
+
+    return () => window.clearInterval(interval)
+  }, [])
+
+  useEffect(() => {
+    const target = LOADING_MESSAGES[loadingStep]
+    let index = 0
+    setTypedLoadingText("")
+
+    const typing = window.setInterval(() => {
+      index += 1
+      setTypedLoadingText(target.slice(0, index))
+      if (index >= target.length) {
+        window.clearInterval(typing)
+      }
+    }, 28)
+
+    return () => window.clearInterval(typing)
+  }, [loadingStep])
+
+  useEffect(() => {
+    let cancelled = false
+
+    async function loadDashboard() {
+      setLoading(true)
+      const startedAt = Date.now()
+
+      try {
+        let resolved = initialAnalysis
+        if (!resolved) {
+          const response = await fetch(API_ENDPOINTS.mockAnalysis, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: "{}",
+          })
+          resolved = await response.json()
+        }
+
+        const elapsed = Date.now() - startedAt
+        const remaining = Math.max(0, MIN_LOADING_MS - elapsed)
+        if (remaining > 0) {
+          await new Promise((resolve) => window.setTimeout(resolve, remaining))
+        }
+
+        if (!cancelled) {
+          setData(resolved)
+        }
+      } catch {
+        if (!cancelled) {
+          setData(null)
+        }
+      } finally {
+        if (!cancelled) {
+          setLoading(false)
+        }
+      }
+    }
+
+    loadDashboard()
+
+    return () => {
+      cancelled = true
+    }
+  }, [initialAnalysis])
 
   useEffect(() => {
     document.documentElement.style.overflow = "hidden"
@@ -454,10 +718,53 @@ export default function ResultsPage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center space-y-2">
-          <Leaf className="w-8 h-8 text-primary animate-pulse mx-auto" />
-          <p className="text-sm text-muted-foreground">Carregando análise…</p>
+      <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(22,163,74,0.10),_transparent_35%),linear-gradient(180deg,#fbfdfb_0%,#f4f8f4_100%)]">
+        <div className="mx-auto flex min-h-screen max-w-4xl items-center justify-center px-6">
+          <div className="flex w-full flex-col items-center text-center">
+            <div className="relative mb-8 flex items-center justify-center">
+              <div className="absolute h-28 w-28 rounded-full bg-primary/10 blur-2xl" />
+              <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-primary/15 bg-white shadow-lg">
+                <div className="absolute h-20 w-20 animate-spin rounded-full border-2 border-primary/15 border-t-primary" />
+                <div className="absolute -right-2 -top-2 rounded-2xl bg-primary p-2 text-primary-foreground shadow-md animate-[bounce_1.8s_ease-in-out_infinite]">
+                  <Bot className="h-4 w-4" />
+                </div>
+                <img
+                  src="/logo.jpeg"
+                  alt="Logo SafraViva"
+                  className="h-10 w-10 rounded-2xl object-cover animate-pulse"
+                />
+              </div>
+            </div>
+
+            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-white/80 px-4 py-2 text-xs font-medium text-primary shadow-sm">
+              <Sparkles className="h-3.5 w-3.5" />
+              Safrinia preparando sua leitura da área
+            </div>
+
+            <h1 className="max-w-2xl text-3xl font-black tracking-tight text-foreground sm:text-4xl">
+              Gerando seu dashboard agroclimático
+            </h1>
+
+            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
+              Estamos cruzando clima, satélite, território e contexto agronômico para montar uma leitura mais clara da sua área.
+            </p>
+
+            <div className="mt-8 min-h-16 max-w-2xl rounded-2xl border bg-white/85 px-5 py-4 text-sm text-foreground shadow-sm backdrop-blur sm:text-base">
+              <span>{typedLoadingText}</span>
+              <span className="ml-1 inline-block h-5 w-[2px] animate-pulse bg-primary align-middle" />
+            </div>
+
+            <div className="mt-6 h-1.5 w-full max-w-md overflow-hidden rounded-full bg-primary/10">
+              <div
+                className="h-full rounded-full bg-primary transition-all duration-500"
+                style={{ width: `${((loadingStep + 1) / LOADING_MESSAGES.length) * 100}%` }}
+              />
+            </div>
+
+            <p className="mt-4 text-xs text-muted-foreground">
+              Isso leva só alguns segundos.
+            </p>
+          </div>
         </div>
       </div>
     )
@@ -473,6 +780,24 @@ export default function ResultsPage() {
 
   const risk = RISK_CONFIG[data.summary.risk_level] ?? RISK_CONFIG.moderado
   const { metrics, risk_flags, forecast_timeseries, copilot_response, field_info, summary, data_sources: dataSources } = data
+
+  const criticalFlags = [
+    risk_flags.dry_risk_flag && "seca no curto prazo",
+    risk_flags.heat_risk_flag && "temperatura acima do ideal",
+    risk_flags.outside_zarc_flag && "fora da janela ZARC",
+    risk_flags.vegetation_stress_flag && "estresse vegetativo",
+  ].filter(Boolean) as string[]
+
+  const situationSummary =
+    criticalFlags.length > 0
+      ? `Os principais pontos de atenção agora são ${criticalFlags.join(", ")}.`
+      : "Os sinais atuais estão dentro da faixa esperada para a área analisada."
+
+  const sourceStatus =
+    dataSources.climate.provider.toLowerCase().includes("synthetic") ||
+    dataSources.satellite.provider.toLowerCase().includes("synthetic")
+      ? "Análise com parte dos sinais em fallback."
+      : "Análise baseada em fontes conectadas."
 
   const forecastChart = forecast_timeseries.map((d) => ({
     dia: fmtDate(d.forecast_time),
@@ -499,14 +824,17 @@ export default function ResultsPage() {
   )
 
   return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
+    <TooltipProvider>
+      <div className="h-screen flex flex-col bg-background overflow-hidden">
       {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur-sm z-50 shrink-0">
         <div className="container mx-auto max-w-full px-4 h-14 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <div className="w-7 h-7 bg-primary rounded-lg flex items-center justify-center shrink-0">
-              <Leaf className="w-3.5 h-3.5 text-primary-foreground" />
-            </div>
+            <img
+              src="/logo.jpeg"
+              alt="Logo SafraViva"
+              className="h-7 w-7 shrink-0 rounded-lg object-cover"
+            />
             <span className="font-bold text-sm">SafraViva</span>
           </Link>
           <Link to="/solicitar-demo" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
@@ -571,6 +899,27 @@ export default function ResultsPage() {
               </div>
             </div>
 
+            <div className="grid gap-3 md:grid-cols-3">
+              <SummaryPanel
+                title="Situação agora"
+                description={situationSummary}
+                icon={risk_flags.dry_risk_flag || risk_flags.heat_risk_flag ? ShieldAlert : ShieldCheck}
+                tone={risk_flags.dry_risk_flag || risk_flags.heat_risk_flag ? "alert" : "good"}
+              />
+              <SummaryPanel
+                title="Prioridade de ação"
+                description={summary.recommended_action}
+                icon={Activity}
+                tone="neutral"
+              />
+              <SummaryPanel
+                title="Confiabilidade da leitura"
+                description={sourceStatus}
+                icon={Satellite}
+                tone="neutral"
+              />
+            </div>
+
             {/* Flags */}
             <div className="flex flex-wrap gap-1.5">
               <FlagBadge active={risk_flags.dry_risk_flag} label="Seca" />
@@ -578,6 +927,48 @@ export default function ResultsPage() {
               <FlagBadge active={risk_flags.outside_zarc_flag} label="Fora do ZARC" />
               <FlagBadge active={risk_flags.vegetation_stress_flag} label="Estresse vegetativo" />
             </div>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between gap-2">
+                  <CardTitle className="text-sm font-semibold">Leitura rápida da área</CardTitle>
+                  <HelpTooltip text="Resumo visual dos sinais principais da análise. Serve para bater o olho no comportamento de chuva, temperatura, umidade e vento sem precisar interpretar cada fonte técnica separadamente." />
+                </div>
+                <p className="text-xs text-muted-foreground">Valores organizados para leitura operacional</p>
+              </CardHeader>
+              <CardContent className="grid gap-3 md:grid-cols-2">
+                <SignalMeter
+                  label="Chuva prevista"
+                  value={fmtValue(metrics.precip_forecast_7d_mm, 1)}
+                  unit="mm em 7 dias"
+                  progress={normalizeMetric(metrics.precip_forecast_7d_mm, 60)}
+                  tone={risk_flags.dry_risk_flag ? "alert" : "good"}
+                  hint={`14 dias: ${fmtValue(metrics.precip_forecast_14d_mm, 1)} mm`}
+                />
+                <SignalMeter
+                  label="Temperatura máxima"
+                  value={fmtValue(metrics.temp_max_7d_c, 1)}
+                  unit="°C"
+                  progress={normalizeMetric(metrics.temp_max_7d_c, 40)}
+                  tone={risk_flags.heat_risk_flag ? "alert" : "neutral"}
+                  hint={`Média: ${fmtValue(metrics.temp_mean_7d_c, 1)} °C`}
+                />
+                <SignalMeter
+                  label="Umidade média"
+                  value={fmtValue(metrics.humidity_mean_7d_pct, 0)}
+                  unit="%"
+                  progress={normalizeMetric(metrics.humidity_mean_7d_pct, 100)}
+                  tone={metrics.humidity_mean_7d_pct >= 58 ? "good" : "alert"}
+                />
+                <SignalMeter
+                  label="Vento médio"
+                  value={fmtValue(metrics.wind_mean_7d_ms, 1)}
+                  unit="m/s"
+                  progress={normalizeMetric(metrics.wind_mean_7d_ms, 10)}
+                  tone={metrics.wind_mean_7d_ms > 4.8 ? "alert" : "neutral"}
+                />
+              </CardContent>
+            </Card>
 
             {/* Métricas */}
             <div className="grid grid-cols-2 gap-2.5">
@@ -592,22 +983,41 @@ export default function ResultsPage() {
             {/* Gráfico previsão */}
             <Card>
               <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-semibold">Previsão — 14 dias</CardTitle>
-                <p className="text-xs text-muted-foreground">Chuva (barras) · Temperatura (linha)</p>
+                <div className="flex items-center justify-between gap-2">
+                  <CardTitle className="text-sm font-semibold">Previsão — 14 dias</CardTitle>
+                  <HelpTooltip text="O gráfico combina chuva e temperatura dos próximos 14 dias. Barras maiores indicam mais precipitação; a linha mostra a temperatura esperada. Use para entender tendência, não só um valor isolado." />
+                </div>
+                <p className="text-xs text-muted-foreground">Chuva (barras) · Temperatura (linha) · foco no curto prazo</p>
               </CardHeader>
               <CardContent>
                 <ResponsiveContainer width="100%" height={190}>
-                  <ComposedChart data={forecastChart} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                  <ComposedChart data={forecastChart} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                     <XAxis dataKey="dia" tick={{ fontSize: 9 }} />
-                    <YAxis yAxisId="left" tick={{ fontSize: 9 }} />
-                    <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 9 }} domain={[20, 40]} />
+                    <YAxis yAxisId="left" tick={{ fontSize: 9 }} width={32} />
+                    <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 9 }} domain={[20, 40]} width={32} />
                     <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8, border: "1px solid #e2e8f0" }} />
                     <Legend wrapperStyle={{ fontSize: 10 }} />
-                    <Bar yAxisId="left" dataKey="Chuva (mm)" fill="#93c5fd" radius={[3, 3, 0, 0]} />
-                    <Line yAxisId="right" dataKey="Temp (°C)" stroke="#f97316" dot={false} strokeWidth={2} />
+                    <Bar yAxisId="left" dataKey="Chuva (mm)" fill="#93c5fd" isAnimationActive={false} />
+                    <Line yAxisId="right" dataKey="Temp (°C)" stroke="#f97316" dot={false} strokeWidth={2} isAnimationActive={false} />
                   </ComposedChart>
                 </ResponsiveContainer>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <CalendarRange className="h-4 w-4 text-primary" />
+                    <CardTitle className="text-sm font-semibold">Próximos 5 dias</CardTitle>
+                  </div>
+                  <HelpTooltip text="Tabela curta para leitura rápida do curto prazo. A coluna de leitura resume o dia como mais crítico, seco, calor ou estável para facilitar a decisão." />
+                </div>
+                <p className="text-xs text-muted-foreground">Tabela curta para leitura rápida de decisão</p>
+              </CardHeader>
+              <CardContent>
+                <ForecastTable points={forecast_timeseries} />
               </CardContent>
             </Card>
 
@@ -615,20 +1025,23 @@ export default function ResultsPage() {
             {ndviChart.length > 0 && (
               <Card>
                 <CardHeader className="pb-2">
-                  <CardTitle className="text-sm font-semibold">NDVI — Vegetação</CardTitle>
+                  <div className="flex items-center justify-between gap-2">
+                    <CardTitle className="text-sm font-semibold">NDVI — Vegetação</CardTitle>
+                    <HelpTooltip text="NDVI é um indicador de vigor da vegetação. Em geral, curvas mais altas e estáveis sugerem melhor resposta vegetativa; quedas podem sinalizar estresse e devem ser lidas junto com clima e estágio da cultura." />
+                  </div>
                   <p className="text-xs text-muted-foreground">
                     {dataSources.satellite.provider} · Nuvens: {dataSources.satellite.cloud_cover_pct}%
                   </p>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={160}>
-                    <LineChart data={ndviChart} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                    <LineChart data={ndviChart} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
                       <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                       <XAxis dataKey="data" tick={{ fontSize: 9 }} />
-                      <YAxis tick={{ fontSize: 9 }} domain={[0.3, 0.9]} />
+                      <YAxis tick={{ fontSize: 9 }} domain={[0.3, 0.9]} width={36} />
                       <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8, border: "1px solid #e2e8f0" }} />
                       <Line dataKey="NDVI" stroke="#16a34a" strokeWidth={2.5}
-                        dot={{ fill: "#16a34a", r: 4 }} activeDot={{ r: 6 }} />
+                        dot={{ fill: "#16a34a", r: 4 }} activeDot={{ r: 6 }} isAnimationActive={false} />
                     </LineChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -638,18 +1051,24 @@ export default function ResultsPage() {
             {/* Copiloto */}
             <Card className="border-primary/20 bg-primary/5">
               <CardHeader className="pb-3">
-                <div className="flex items-center gap-2">
-                  <div className="p-1.5 rounded-lg bg-primary/15">
-                    <Sprout className="w-4 h-4 text-primary" />
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-primary/15">
+                      <Sprout className="w-4 h-4 text-primary" />
+                    </div>
+                    <div>
+                      <CardTitle className="text-sm font-semibold">Safrinia</CardTitle>
+                      <p className="text-xs text-muted-foreground">Diagnóstico em linguagem natural</p>
+                    </div>
                   </div>
-                  <div>
-                    <CardTitle className="text-sm font-semibold">Safrinia</CardTitle>
-                    <p className="text-xs text-muted-foreground">Diagnóstico em linguagem natural</p>
-                  </div>
+                  <HelpTooltip text="Este card traduz a análise técnica em linguagem direta. O conteúdo vem das regras do backend com base no score, nas flags e nas métricas calculadas para a área." />
                 </div>
               </CardHeader>
               <CardContent className="space-y-3">
-                <p className="text-sm text-foreground leading-relaxed">{copilot_response.summary}</p>
+                <div className="rounded-xl border border-primary/15 bg-background/80 p-3">
+                  <p className="text-[11px] font-semibold uppercase tracking-wide text-muted-foreground">Resumo direto</p>
+                  <p className="mt-1 text-sm text-foreground leading-relaxed">{copilot_response.summary}</p>
+                </div>
                 <div>
                   <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Por que esse risco?</p>
                   <ul className="space-y-1.5">
@@ -662,16 +1081,67 @@ export default function ResultsPage() {
                   </ul>
                 </div>
                 <Separator />
-                <div className="flex gap-2">
-                  <CheckCircle2 className="w-4 h-4 text-primary shrink-0 mt-0.5" />
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
+                  <div className="mb-1 flex items-center gap-2">
+                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-700">Ação sugerida</p>
+                  </div>
                   <p className="text-sm font-medium text-foreground">{copilot_response.action}</p>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <MapPinned className="h-4 w-4 text-primary" />
+                    <CardTitle className="text-sm font-semibold">Quadro da área</CardTitle>
+                  </div>
+                  <HelpTooltip text="Resumo cadastral e agronômico da análise. Mostra o recorte territorial, a data de plantio, o estágio inferido e a aderência ao ZARC para contextualizar o risco." />
+                </div>
+                <p className="text-xs text-muted-foreground">Resumo objetivo do que foi analisado</p>
+              </CardHeader>
+              <CardContent>
+                <div className="overflow-hidden rounded-xl border">
+                  <table className="w-full text-left text-sm">
+                    <tbody>
+                      <tr className="border-b">
+                        <td className="bg-muted/40 px-3 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Área</td>
+                        <td className="px-3 py-2 font-medium">{fmtValue(field_info.area_ha, 2)} ha</td>
+                      </tr>
+                      <tr className="border-b">
+                        <td className="bg-muted/40 px-3 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Local</td>
+                        <td className="px-3 py-2 font-medium">{field_info.municipio}, {field_info.uf}</td>
+                      </tr>
+                      <tr className="border-b">
+                        <td className="bg-muted/40 px-3 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Plantio</td>
+                        <td className="px-3 py-2 font-medium">{fmtDate(field_info.sowing_date)}</td>
+                      </tr>
+                      <tr className="border-b">
+                        <td className="bg-muted/40 px-3 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Estágio</td>
+                        <td className="px-3 py-2 font-medium">{stageName(field_info.crop_stage)}</td>
+                      </tr>
+                      <tr>
+                        <td className="bg-muted/40 px-3 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">ZARC</td>
+                        <td className="px-3 py-2">
+                          <span className={cn("rounded-full border px-2 py-1 text-xs font-medium", riskTone(!dataSources.zarc.planting_within_window))}>
+                            {dataSources.zarc.planting_within_window ? "Dentro da janela" : "Fora da janela"}
+                          </span>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </table>
                 </div>
               </CardContent>
             </Card>
 
             {/* Fontes de dados */}
             <div>
-              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Fontes de dados</p>
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide">Fontes de dados</p>
+                <HelpTooltip text="Mostra de onde vieram os sinais usados na análise e quais observações foram consideradas em clima, satélite, ZARC e histórico. Serve para dar transparência ao resultado." />
+              </div>
               <div className="space-y-2">
                 <SourceCard icon={CloudRain} title="Clima"
                   subtitle={`${dataSources.climate.provider} · ${dataSources.climate.model}`}
@@ -760,6 +1230,7 @@ export default function ResultsPage() {
         </div>
 
       </div>
-    </div>
+      </div>
+    </TooltipProvider>
   )
 }

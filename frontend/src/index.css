@@ -133,3 +133,9 @@
     @apply font-sans;
     }
 }
+
+/* Garante que tooltips/popovers do Radix UI (portal) apareçam acima do Leaflet.
+   Leaflet usa z-index até ~1000 nos controles; usamos 2000 para ficar seguro. */
+[data-radix-popper-content-wrapper] {
+  z-index: 2000 !important;
+}

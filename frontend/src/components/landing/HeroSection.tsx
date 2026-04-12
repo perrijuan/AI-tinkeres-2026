@@ -27,26 +27,28 @@ export default function HeroSection() {
         {/* ── Coluna esquerda: copy ── */}
         <div className="text-white space-y-8">
           <Badge className="bg-primary/25 text-primary-foreground/85 border border-primary/40 text-xs px-3 py-1 w-fit">
-            🛰️ Score de risco climático em tempo real
+            🛰️ ZARC + Satélite + IA — em tempo real
           </Badge>
 
           <div className="space-y-5">
             <h1 className="text-5xl lg:text-6xl font-bold leading-[1.1] tracking-tight">
-              Decisões mais{" "}
-              <span className="text-primary">seguras</span>{" "}
-              para a agricultura brasileira
+              Score de risco{" "}
+              <span className="text-primary">por talhão</span>
+              {" "}antes de plantar.
             </h1>
             <p className="text-lg text-primary-foreground/70 leading-relaxed max-w-lg">
-              O SafraViva integra o ZARC com dados satelitais em tempo real,
-              gerando scores de risco precisos por área agrícola — atualizado
-              continuamente para refletir o que acontece agora.
+              O SafraViva cruza o ZARC com dados satelitais e climáticos em
+              tempo real — gerando um score de risco preciso, por área, por
+              cultura e por data de plantio.
             </p>
           </div>
 
           <div className="flex flex-wrap gap-3">
-            <Button size="lg" className="gap-2 shadow-lg shadow-black/30">
-              Solicitar Demo Gratuita
-              <ArrowRight className="w-4 h-4" />
+            <Button size="lg" className="gap-2 shadow-lg shadow-black/30" asChild>
+              <a href="#faq">
+                Ver como funciona
+                <ArrowRight className="w-4 h-4" />
+              </a>
             </Button>
             <Button
               size="lg"
@@ -54,7 +56,7 @@ export default function HeroSection() {
               className="border-white/25 text-white hover:bg-white/10 hover:text-white"
               asChild
             >
-              <a href="#como-funciona">Como Funciona</a>
+              <a href="#contato">Solicitar Demo</a>
             </Button>
           </div>
 

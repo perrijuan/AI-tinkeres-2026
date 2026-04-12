@@ -60,15 +60,15 @@ export default function ImpactSection() {
         <div className="text-center space-y-4 mb-14">
           {/* bg-primary/10 text-primary — reactivo ao tema */}
           <Badge className="bg-primary/10 text-primary border border-primary/20 text-xs">
-            Impacto
+            Impacto & ODS
           </Badge>
           <h2 className="text-4xl font-bold tracking-tight">
-            Impacto real, transformação sustentável
+            Resultado econômico com propósito global
           </h2>
           <p className="text-muted-foreground text-lg max-w-2xl mx-auto leading-relaxed">
-            A SafraViva contribui diretamente para os Objetivos de
-            Desenvolvimento Sustentável da ONU, alinhando resultado econômico e
-            propósito social.
+            Menos perdas no campo significa mais segurança alimentar, mais
+            resiliência climática e mais parcerias sustentáveis. A SafraViva
+            alinha lucro e impacto — contribuindo diretamente para três ODS da ONU.
           </p>
         </div>
 
