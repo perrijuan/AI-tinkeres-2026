@@ -14,6 +14,7 @@ import "leaflet/dist/leaflet.css"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import AnalysisLoadingScreen from "@/components/AnalysisLoadingScreen"
 import BrandLogo from "@/components/BrandLogo"
 import { cn } from "@/lib/utils"
 import { API_ENDPOINTS } from "@/config"
@@ -159,6 +160,15 @@ export default function DemoPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (loading) {
+    return (
+      <AnalysisLoadingScreen
+        title="Estamos montando a análise da sua área"
+        subtitle="Os dados do talhão já foram enviados. Agora o sistema está cruzando sinais climáticos, satelitais e agronômicos para preparar o dashboard."
+      />
+    )
   }
 
   return (
