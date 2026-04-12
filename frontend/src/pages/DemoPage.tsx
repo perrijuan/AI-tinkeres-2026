@@ -347,8 +347,8 @@ export default function DemoPage() {
 
           {/* Mapa full */}
           <MapContainer
-            center={[-18.094, -54.552]}
-            zoom={11}
+            center={[-12.7, -55.9]}
+            zoom={6}
             style={{ height: "100%", width: "100%" }}
             zoomControl={false}
           >
