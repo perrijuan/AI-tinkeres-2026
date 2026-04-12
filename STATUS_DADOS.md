@@ -35,16 +35,86 @@ Hoje, pelo código:
 
 ---
 
+## Fluxo do formulário até o algoritmo
+
+Hoje o frontend envia um payload estruturado para `POST /api/v1/analysis`, então a integração front → backend é real e bem definida. Mas os campos têm pesos diferentes no sistema:
+
+- alguns entram diretamente no algoritmo
+- alguns são recalculados no backend
+- alguns são usados só para identificação ou UX
+- alguns hoje estão fixos no frontend
+
+### Leitura geral
+
+O fluxo está dinâmico no sentido de contrato e transporte de dados, mas ainda não está 100% dinâmico do ponto de vista de modelagem de entrada do usuário. O motor de risco hoje depende principalmente de:
+
+- `culture`
+- `sowing_date`
+- `analysis_timestamp`
+- `geometry`
+
+Campos como nome, e-mail e empresa não afetam o score.
+
+---
+
+## Mapeamento do formulário para o backend
+
+| Campo do frontend | Enviado ao backend | Usado no algoritmo | Status | Observação |
+|---|---|---|---|---|
+| Nome (`nome`) | 🟡 Indiretamente | ❌ Não | 🟡 Parcial | Entra na composição de `field_id` e pode virar `property_name` se `empresa` estiver vazia |
+| Empresa (`empresa`) | ✅ Sim | ❌ Não | 🟡 Parcial | Vira `property_name`, usado para identificação no resultado |
+| E-mail (`email`) | ❌ Não | ❌ Não | 🔴 Não integrado | É obrigatório no frontend, mas não vai para a API nem para o algoritmo |
+| Cultura (`cultura`) | ✅ Sim | ✅ Sim | ✅ Real | Afeta perfil agronômico, thresholds e leitura de ZARC |
+| Data de plantio (`sowingDate`) | ✅ Sim | ✅ Sim | ✅ Real | Afeta estágio da cultura e leitura da janela ZARC |
+| Polígono desenhado (`points`) | ✅ Sim | ✅ Sim | ✅ Real | Base para área, centroide, município, clima, satélite e mapa |
+| Área calculada no frontend (`areaHa`) | ❌ Não | ❌ Não | 🔴 Só UX local | O frontend calcula, mas não envia; o backend recalcula a área real |
+| `field_id` | ✅ Sim | ❌ Não | 🟡 Parcial | Identificador dinâmico, mas não influencia a análise |
+| `property_name` | ✅ Sim | ❌ Não | 🟡 Parcial | Identificação textual da análise, sem efeito no score |
+| `crop_stage` | ✅ Sim (`null`) | 🟡 Indiretamente | 🟡 Parcial | O frontend não informa; o backend infere automaticamente |
+| `irrigated` | ✅ Sim (`false`) | ✅ Sim | 🟡 Parcial | O algoritmo usa, mas o frontend hoje sempre manda `false` |
+| `analysis_timestamp` | ✅ Sim | ✅ Sim | ✅ Real | Entra na janela temporal da análise e no fallback determinístico |
+
+---
+
+## O que está realmente dinâmico hoje
+
+### Dinâmico e estrutural
+
+- cultura selecionada
+- data de plantio
+- geometria desenhada
+- timestamp da análise
+
+Esses campos efetivamente alteram a análise.
+
+### Dinâmico, mas só informacional
+
+- `field_id`
+- `property_name`
+
+Esses campos mudam conforme o usuário preenche o formulário, mas hoje não mudam o comportamento do algoritmo.
+
+### Ainda não dinâmico de verdade
+
+- `email`, porque não é enviado ao backend
+- `irrigated`, porque está fixo como `false`
+- `crop_stage`, porque o frontend sempre manda `null`
+
+---
+
 ## Entrada do usuário
 
 | Elemento | Status | Observação |
 |---|---|---|
-| Nome da propriedade | ✅ Real | Recebido do formulário e enviado ao backend |
+| Nome da propriedade | 🟡 Parcial | Recebido do formulário e enviado ao backend, mas sem efeito no cálculo |
 | Cultura | ✅ Real | Selecionada no frontend e enviada ao backend |
 | Data de plantio | ✅ Real | Informada pelo usuário |
 | Geometria do talhão | ✅ Real | Polígono desenhado pelo usuário |
-| Área em hectares | ✅ Real | Calculada sobre o polígono |
+| Área em hectares | ✅ Real | Recalculada no backend a partir do polígono |
 | `analysis_timestamp` | ✅ Real | Gerado no momento da análise |
+| E-mail do usuário | 🔴 Não integrado | Existe no formulário, mas não é enviado para a API |
+| Irrigação | 🔴 Não capturado pelo usuário | O backend aceita o campo, mas o frontend fixa `false` |
+| Estágio da cultura informado pelo usuário | 🔴 Não capturado pelo usuário | O backend aceita o campo, mas o frontend manda `null` |
 
 ---
 
@@ -166,7 +236,7 @@ Ainda não há integração com uma base histórica operacional de produtividade
 
 | Elemento | Status | Observação |
 |---|---|---|
-| Score de risco | 🟡 Parcial | Algoritmo real, mas mistura dados reais e fallback |
+| Score de risco | 🟡 Parcial | Algoritmo real, alimentado por cultura, data, geometria e fontes reais ou fallback |
 | Nível de risco | ✅ Real | Derivado do score |
 | Flags de seca, calor, ZARC e vegetação | 🟡 Parcial | Regras reais, dependentes da qualidade dos insumos |
 | Alerta principal | ✅ Real | Gerado por lógica do backend |
@@ -200,13 +270,31 @@ O motor de decisão já existe e é real. O que ainda oscila é a fidelidade das
 
 | Elemento | Status | Observação |
 |---|---|---|
-| Polígono desenhado | ✅ Real | Vem da geometria do usuário |
+| Polígono desenhado | ✅ Real | Vem diretamente da geometria enviada pelo usuário |
 | Cor do polígono | ✅ Real | Derivada do nível de risco |
 | Tooltip do mapa | ✅ Real | Montado pelo backend |
 | Cards de métricas | 🟡 Parcial | Reais ou sintéticos conforme origem dos dados |
 | Gráfico de previsão | 🟡 Parcial | Real ou sintético conforme clima |
 | Gráfico de NDVI | 🟡 Parcial | Real ou sintético conforme satélite |
 | Bloco de fontes de dados | ✅ Real | Exibe a origem realmente entregue pelo backend |
+| Nome da propriedade no dashboard | 🟡 Parcial | Dinâmico, mas apenas informacional |
+| Cultura no dashboard | ✅ Real | Dinâmica e também usada no algoritmo |
+| Área exibida no dashboard | ✅ Real | Vem do cálculo do backend, não do cálculo visual do frontend |
+| Estágio exibido no dashboard | ✅ Real | Inferido pelo backend a partir da data de plantio |
+
+---
+
+## Conclusão específica sobre a estrutura dos dados do front
+
+O front hoje entrega um payload válido, consistente e suficiente para acionar o pipeline real. Então a resposta curta é: sim, a estrutura está boa para o MVP e a integração com o backend funciona de forma organizada.
+
+Mas há três pontos importantes:
+
+1. nem tudo que o usuário preenche influencia a análise
+2. parte do que aparece dinâmico na interface é só informacional
+3. ainda faltam entradas relevantes de negócio, como irrigação e estágio manual, para dizer que o formulário está totalmente conectado ao algoritmo
+
+Em resumo, o fluxo está bem estruturado tecnicamente, mas ainda parcialmente aproveitado pelo motor de decisão.
 
 ---
 
