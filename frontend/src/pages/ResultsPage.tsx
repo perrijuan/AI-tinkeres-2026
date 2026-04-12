@@ -533,8 +533,8 @@ function ForecastTable({
   const rows = points.slice(0, 5)
 
   return (
-    <div className="overflow-hidden rounded-xl border">
-      <table className="w-full text-left text-sm">
+    <div className="overflow-x-auto rounded-xl border">
+      <table className="w-full min-w-[34rem] text-left text-sm">
         <thead className="bg-muted/50 text-[11px] uppercase tracking-wide text-muted-foreground">
           <tr>
             <th className="px-3 py-2 font-medium">Dia</th>
@@ -742,6 +742,95 @@ function ChatPanel({
   )
 }
 
+function FieldMap({
+  center,
+  positions,
+  fillColor,
+  strokeColor,
+  summary,
+  conversationId,
+  chatOpen,
+  chatFullscreen,
+  onOpenChat,
+  onCloseChat,
+  onToggleFullscreen,
+  className,
+}: {
+  center: [number, number]
+  positions: [number, number][]
+  fillColor: string
+  strokeColor: string
+  summary: string
+  conversationId?: string
+  chatOpen: boolean
+  chatFullscreen: boolean
+  onOpenChat: () => void
+  onCloseChat: () => void
+  onToggleFullscreen: () => void
+  className?: string
+}) {
+  return (
+    <div className={cn("relative overflow-hidden bg-muted", className)}>
+      <MapContainer
+        center={center}
+        zoom={12}
+        style={{ height: "100%", width: "100%" }}
+        zoomControl={true}
+      >
+        <TileLayer
+          attribution='&copy; <a href="https://carto.com/">CARTO</a>'
+          url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
+        />
+        <Polygon
+          positions={positions}
+          pathOptions={{
+            color: strokeColor,
+            weight: 2.5,
+            fillColor,
+            fillOpacity: 0.35,
+          }}
+        />
+      </MapContainer>
+
+      <div className="absolute right-3 bottom-3 left-3 z-1000 rounded-lg border bg-background/95 px-3 py-2 text-xs shadow-md backdrop-blur-sm sm:right-auto sm:max-w-sm">
+        {summary}
+      </div>
+
+      {conversationId && (
+        <>
+          {!chatOpen && (
+            <button
+              onClick={onOpenChat}
+              className="absolute top-3 right-3 z-1000 flex items-center gap-2 rounded-full bg-primary px-3 py-2 text-xs font-medium text-primary-foreground shadow-lg transition-all hover:bg-primary/90 sm:bottom-4 sm:top-auto sm:px-4 sm:py-3 sm:text-sm"
+            >
+              <MessageCircle className="h-4 w-4" />
+              Safrinia
+            </button>
+          )}
+
+          {chatOpen && (
+            <div
+              className={cn(
+                "flex flex-col overflow-hidden border bg-background shadow-2xl transition-all duration-300",
+                chatFullscreen
+                  ? "fixed inset-0 z-9999 rounded-none"
+                  : "absolute inset-x-3 bottom-3 z-1000 h-[min(32rem,calc(100%-1.5rem))] rounded-lg sm:right-4 sm:left-auto sm:h-130 sm:w-95"
+              )}
+            >
+              <ChatPanel
+                conversationId={conversationId}
+                onClose={onCloseChat}
+                isFullscreen={chatFullscreen}
+                onToggleFullscreen={onToggleFullscreen}
+              />
+            </div>
+          )}
+        </>
+      )}
+    </div>
+  )
+}
+
 export default function ResultsPage() {
   const location = useLocation()
   const initialAnalysis =
@@ -848,8 +937,8 @@ export default function ResultsPage() {
     "Temp (°C)": d.temp_c,
   }))
 
-  const ndviChart = satelliteData.ndvi_timeseries?.length > 0 
-    ? satelliteData.ndvi_timeseries.map((d: any) => ({
+  const ndviChart = satelliteData.ndvi_timeseries?.length > 0
+    ? satelliteData.ndvi_timeseries.map((d) => ({
         data: fmtDate(d.date),
         NDVI: d.ndvi,
       }))
@@ -879,15 +968,15 @@ export default function ResultsPage() {
 
   return (
     <TooltipProvider>
-      <div className="h-screen flex flex-col bg-background overflow-hidden">
+      <div className="flex min-h-dvh flex-col bg-background lg:h-screen lg:overflow-hidden">
       {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur-sm z-50 shrink-0">
-        <div className="container mx-auto max-w-full px-4 h-14 flex items-center justify-between">
+        <div className="container mx-auto flex min-h-14 max-w-full items-center justify-between gap-3 px-3 py-2 sm:px-4">
           <Link to="/" className="flex items-center gap-2">
             <BrandLogo className="h-8 w-8 rounded-[0.95rem]" imageClassName="rounded-[0.7rem]" />
             <span className="font-bold text-sm">SafraViva</span>
           </Link>
-          <Link to="/solicitar-demo" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">
+          <Link to="/solicitar-demo" className="flex shrink-0 items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
             <ArrowLeft className="w-3.5 h-3.5" />
             Nova análise
           </Link>
@@ -898,12 +987,12 @@ export default function ResultsPage() {
       <div className="flex-1 flex overflow-hidden min-h-0">
 
         {/* ── Painel esquerdo: scroll ── */}
-        <div className="w-full lg:w-130 xl:w-145 shrink-0 overflow-y-auto border-r min-h-0">
-          <div className="p-5 space-y-5">
+        <div className="min-h-0 w-full shrink-0 overflow-y-auto border-r lg:w-130 xl:w-145">
+          <div className="space-y-4 p-3 sm:space-y-5 sm:p-5">
 
             {/* Hero: Score + Info */}
-            <div className={cn("rounded-xl border p-4", risk.bg, risk.border)}>
-              <div className="flex items-center gap-4">
+            <div className={cn("rounded-lg border p-3 sm:p-4", risk.bg, risk.border)}>
+              <div className="flex items-start gap-3 sm:items-center sm:gap-4">
                 {/* Score circular */}
                 <div className="relative flex items-center justify-center shrink-0">
                   <svg width="80" height="80" viewBox="0 0 80 80">
@@ -935,18 +1024,42 @@ export default function ResultsPage() {
 
               <Separator className="my-3" />
 
-              <div className="grid grid-cols-2 gap-x-4 gap-y-1 text-xs">
+              <div className="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-x-3 gap-y-1 text-xs sm:grid-cols-2 sm:gap-x-4">
                 <span className="text-muted-foreground">Propriedade</span>
                 <span className="font-medium truncate">{field_info.property_name}</span>
                 <span className="text-muted-foreground">Cultura</span>
-                <span className="font-medium">{cultureName(field_info.culture)} · {field_info.area_ha} ha</span>
+                <span className="font-medium break-words">{cultureName(field_info.culture)} · {field_info.area_ha} ha</span>
                 <span className="text-muted-foreground">Município</span>
-                <span className="font-medium">{field_info.municipio}, {field_info.uf}</span>
+                <span className="font-medium break-words">{field_info.municipio}, {field_info.uf}</span>
                 <span className="text-muted-foreground">Plantio</span>
                 <span className="font-medium">{fmtDate(field_info.sowing_date)}</span>
                 <span className="text-muted-foreground">Estágio</span>
-                <span className="font-medium">{stageName(field_info.crop_stage)}</span>
+                <span className="font-medium break-words">{stageName(field_info.crop_stage)}</span>
               </div>
+            </div>
+
+            <div className="lg:hidden">
+              <div className="mb-2 flex items-center justify-between gap-2">
+                <div className="flex items-center gap-2">
+                  <MapPinned className="h-4 w-4 text-primary" />
+                  <p className="text-sm font-semibold">Mapa da área</p>
+                </div>
+                <span className="text-xs text-muted-foreground">{fmtValue(field_info.area_ha, 2)} ha</span>
+              </div>
+              <FieldMap
+                center={mapCenter}
+                positions={mapPositions}
+                fillColor={data.map_layer.fill_color}
+                strokeColor={data.map_layer.stroke_color}
+                summary={data.map_layer.tooltip_summary}
+                conversationId={data.conversation_id}
+                chatOpen={chatOpen}
+                chatFullscreen={chatFullscreen}
+                onOpenChat={() => setChatOpen(true)}
+                onCloseChat={() => { setChatOpen(false); setChatFullscreen(false) }}
+                onToggleFullscreen={() => setChatFullscreen((f) => !f)}
+                className="h-[48vh] min-h-80 rounded-lg border"
+              />
             </div>
 
             <div className="grid gap-3 md:grid-cols-3">
@@ -1021,7 +1134,7 @@ export default function ResultsPage() {
             </Card>
 
             {/* Métricas */}
-            <div className="grid grid-cols-2 gap-2.5">
+            <div className="grid grid-cols-1 gap-2.5 sm:grid-cols-2">
               <MetricCard icon={CloudRain} label="Chuva 7 dias" value={metrics.precip_forecast_7d_mm} unit="mm"
                 sub={`14d: ${metrics.precip_forecast_14d_mm} mm`} highlight={risk_flags.dry_risk_flag} />
               <MetricCard icon={Thermometer} label="Temp. máxima 7d" value={metrics.temp_max_7d_c} unit="°C"
@@ -1427,66 +1540,20 @@ export default function ResultsPage() {
         </div>
 
         {/* ── Mapa fixo à direita ── */}
-        <div className="flex-1 relative hidden lg:block">
-          <MapContainer
-            center={mapCenter}
-            zoom={12}
-            style={{ height: "100%", width: "100%" }}
-            zoomControl={true}
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://carto.com/">CARTO</a>'
-              url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-            />
-            <Polygon
-              positions={mapPositions}
-              pathOptions={{
-                color: data.map_layer.stroke_color,
-                weight: 2.5,
-                fillColor: data.map_layer.fill_color,
-                fillOpacity: 0.35,
-              }}
-            />
-          </MapContainer>
-
-          {/* Tooltip overlay */}
-          <div className="absolute bottom-4 left-4 z-1000 bg-background/95 backdrop-blur-sm border rounded-lg px-3 py-2 text-xs shadow-md">
-            {data.map_layer.tooltip_summary}
-          </div>
-
-          {/* Chat panel (slide-in over the map) */}
-          {data.conversation_id && (
-            <>
-              {/* Floating button */}
-              {!chatOpen && (
-                <button
-                  onClick={() => setChatOpen(true)}
-                  className="absolute bottom-4 right-4 z-1000 flex items-center gap-2 bg-primary text-primary-foreground rounded-full px-4 py-3 shadow-lg hover:bg-primary/90 transition-all text-sm font-medium"
-                >
-                  <MessageCircle className="w-4 h-4" />
-                  Fale com a Safrinia
-                </button>
-              )}
-
-              {/* Chat panel */}
-              {chatOpen && (
-                <div className={cn(
-                  "bg-background border shadow-2xl flex flex-col overflow-hidden transition-all duration-300",
-                  chatFullscreen
-                    ? "fixed inset-0 z-9999 rounded-none"
-                    : "absolute bottom-4 right-4 z-1000 w-95 h-130 rounded-2xl"
-                )}>
-                  <ChatPanel
-                    conversationId={data.conversation_id}
-                    onClose={() => { setChatOpen(false); setChatFullscreen(false) }}
-                    isFullscreen={chatFullscreen}
-                    onToggleFullscreen={() => setChatFullscreen((f) => !f)}
-                  />
-                </div>
-              )}
-            </>
-          )}
-        </div>
+        <FieldMap
+          center={mapCenter}
+          positions={mapPositions}
+          fillColor={data.map_layer.fill_color}
+          strokeColor={data.map_layer.stroke_color}
+          summary={data.map_layer.tooltip_summary}
+          conversationId={data.conversation_id}
+          chatOpen={chatOpen}
+          chatFullscreen={chatFullscreen}
+          onOpenChat={() => setChatOpen(true)}
+          onCloseChat={() => { setChatOpen(false); setChatFullscreen(false) }}
+          onToggleFullscreen={() => setChatFullscreen((f) => !f)}
+          className="hidden flex-1 lg:block"
+        />
 
       </div>
       </div>
