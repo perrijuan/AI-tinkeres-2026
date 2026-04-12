@@ -32,6 +32,8 @@ import {
   X,
   Send,
   Loader2,
+  Maximize2,
+  Minimize2,
 } from "lucide-react"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -281,9 +283,13 @@ function SourceCard({
 function ChatPanel({
   conversationId,
   onClose,
+  isFullscreen,
+  onToggleFullscreen,
 }: {
   conversationId: string
   onClose: () => void
+  isFullscreen: boolean
+  onToggleFullscreen: () => void
 }) {
   const [messages, setMessages] = useState<ChatMessage[]>([
     {
@@ -335,12 +341,22 @@ function ChatPanel({
             <p className="text-[10px] text-muted-foreground">Tire dúvidas sobre sua análise</p>
           </div>
         </div>
-        <button
-          onClick={onClose}
-          className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
-        >
-          <X className="w-4 h-4" />
-        </button>
+        <div className="flex items-center gap-1">
+          <button
+            onClick={onToggleFullscreen}
+            className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            title={isFullscreen ? "Minimizar" : "Tela cheia"}
+          >
+            {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
+          </button>
+          <button
+            onClick={onClose}
+            className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
+            title="Fechar"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
       </div>
 
       {/* Messages */}
@@ -417,6 +433,7 @@ export default function ResultsPage() {
   )
   const [loading, setLoading] = useState(!data)
   const [chatOpen, setChatOpen] = useState(false)
+  const [chatFullscreen, setChatFullscreen] = useState(false)
 
   useEffect(() => {
     if (data) return
@@ -724,10 +741,17 @@ export default function ResultsPage() {
 
               {/* Chat panel */}
               {chatOpen && (
-                <div className="absolute bottom-4 right-4 z-1000 w-[380px] h-[520px] bg-background border rounded-2xl shadow-2xl flex flex-col overflow-hidden">
+                <div className={cn(
+                  "bg-background border shadow-2xl flex flex-col overflow-hidden transition-all duration-300",
+                  chatFullscreen
+                    ? "fixed inset-0 z-9999 rounded-none"
+                    : "absolute bottom-4 right-4 z-1000 w-95 h-130 rounded-2xl"
+                )}>
                   <ChatPanel
                     conversationId={data.conversation_id}
-                    onClose={() => setChatOpen(false)}
+                    onClose={() => { setChatOpen(false); setChatFullscreen(false) }}
+                    isFullscreen={chatFullscreen}
+                    onToggleFullscreen={() => setChatFullscreen((f) => !f)}
                   />
                 </div>
               )}
