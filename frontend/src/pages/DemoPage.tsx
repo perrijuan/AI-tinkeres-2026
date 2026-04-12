@@ -172,7 +172,7 @@ export default function DemoPage() {
   }
 
   return (
-    <div className="flex min-h-dvh flex-col bg-background lg:h-screen lg:overflow-hidden">
+    <div className="flex h-dvh flex-col bg-background lg:h-screen lg:overflow-hidden">
 
       {/* ── Header ── */}
       <header className="shrink-0 border-b bg-background/95 backdrop-blur-sm z-50">

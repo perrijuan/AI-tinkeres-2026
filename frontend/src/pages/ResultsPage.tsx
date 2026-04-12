@@ -801,7 +801,7 @@ function FieldMap({
           {!chatOpen && (
             <button
               onClick={onOpenChat}
-              className="absolute top-3 right-3 z-1000 flex min-h-10 items-center gap-2 rounded-full bg-primary px-3 py-2 text-xs font-medium text-primary-foreground shadow-lg transition-all hover:bg-primary/90 sm:bottom-4 sm:top-auto sm:px-4 sm:py-3 sm:text-sm"
+              className="fixed bottom-6 right-4 z-9999 flex min-h-10 items-center gap-2 rounded-full bg-primary px-3 py-2 text-xs font-medium text-primary-foreground shadow-lg transition-all hover:bg-primary/90 sm:px-4 sm:py-3 sm:text-sm lg:absolute lg:bottom-4 lg:right-3 lg:top-auto lg:z-1000"
             >
               <MessageCircle className="h-4 w-4" />
               Safrinia
@@ -814,7 +814,7 @@ function FieldMap({
                 "flex flex-col overflow-hidden border bg-background shadow-2xl transition-all duration-300",
                 chatFullscreen
                   ? "fixed inset-0 z-9999 rounded-none"
-                  : "absolute inset-x-3 bottom-3 z-1000 h-[min(34rem,calc(100%-1.5rem))] rounded-lg sm:right-4 sm:left-auto sm:h-130 sm:w-95"
+                  : "fixed inset-x-3 bottom-3 z-9999 h-[min(34rem,calc(100dvh-5rem))] rounded-lg lg:absolute lg:left-auto lg:right-4 lg:h-130 lg:w-95 lg:z-1000"
               )}
             >
               <ChatPanel
@@ -887,11 +887,17 @@ export default function ResultsPage() {
   }, [initialAnalysis])
 
   useEffect(() => {
-    document.documentElement.style.overflow = "hidden"
-    document.body.style.overflow = "hidden"
+    const mql = window.matchMedia("(min-width: 1024px)")
+    const setOverflow = (locked: boolean) => {
+      document.documentElement.style.overflow = locked ? "hidden" : ""
+      document.body.style.overflow = locked ? "hidden" : ""
+    }
+    setOverflow(mql.matches)
+    const handler = (e: MediaQueryListEvent) => setOverflow(e.matches)
+    mql.addEventListener("change", handler)
     return () => {
-      document.documentElement.style.overflow = ""
-      document.body.style.overflow = ""
+      setOverflow(false)
+      mql.removeEventListener("change", handler)
     }
   }, [])
 
