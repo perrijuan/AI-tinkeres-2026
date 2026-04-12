@@ -3,6 +3,7 @@ import unicodedata
 from datetime import date, datetime
 from typing import Any
 
+from src.features.zarc_lookup import get_zarc_context
 from src.utils.time import ensure_utc
 
 
@@ -67,7 +68,39 @@ def _infer_crop_stage(sowing_date: date, analysis_timestamp: datetime) -> str:
     return "maturacao"
 
 
-def get_agro_context(inputs: dict[str, Any], spatial_context: dict[str, Any]) -> dict[str, Any]:
+def _build_fallback_territorial_context(spatial_context: dict[str, Any]) -> dict[str, Any]:
+    territorial_seed = f"{spatial_context['centroid_lat']}:{spatial_context['centroid_lon']}"
+    vegetation_stress_index = round(0.35 + _hash_ratio(territorial_seed) * 0.5, 3)
+    soil_water_buffer_index = round(0.25 + _hash_ratio(territorial_seed + ":soil") * 0.6, 3)
+    vulnerability_index = round(
+        (vegetation_stress_index * 0.55) + ((1.0 - soil_water_buffer_index) * 0.45),
+        3,
+    )
+    return {
+        "source": "heuristic",
+        "provider": "SafraViva Heuristic Territory",
+        "alphaearth_cluster": f"mt_cluster_{int(_hash_ratio(territorial_seed + ':cluster') * 5) + 1}",
+        "vegetation_stress_index": vegetation_stress_index,
+        "soil_water_buffer_index": soil_water_buffer_index,
+        "vulnerability_index": vulnerability_index,
+        "signals": [
+            f"Indice de estresse vegetativo: {vegetation_stress_index} (fallback heuristico).",
+            f"Indice de buffer hidrico do solo: {soil_water_buffer_index} (fallback heuristico).",
+        ],
+        "ndvi": None,
+        "evi": None,
+        "lst_c": None,
+        "cloud_cover_pct": None,
+        "last_image": None,
+        "ndvi_timeseries": [],
+    }
+
+
+def get_agro_context(
+    inputs: dict[str, Any],
+    spatial_context: dict[str, Any],
+    territorial_context_override: dict[str, Any] | None = None,
+) -> dict[str, Any]:
     culture_raw = inputs["culture"]
     culture = _normalize_text(culture_raw)
     profile = CULTURE_PROFILES.get(culture, DEFAULT_CULTURE_PROFILE)
@@ -78,12 +111,12 @@ def get_agro_context(inputs: dict[str, Any], spatial_context: dict[str, Any]) ->
     municipio = spatial_context["municipio"]
 
     crop_stage = inputs.get("crop_stage") or _infer_crop_stage(sowing_date, analysis_timestamp)
-    zarc_flag = _in_zarc_window(sowing_date, profile["zarc_windows"])
+    heuristic_zarc_flag = _in_zarc_window(sowing_date, profile["zarc_windows"])
+    zarc_context = get_zarc_context(culture_raw, municipio, sowing_date.isoformat(), heuristic_zarc_flag)
+    zarc_flag = bool(zarc_context["zarc_flag"])
 
     volatility_seed = f"{municipio}:{culture}:volatility"
     trend_seed = f"{municipio}:{culture}:trend"
-    territorial_seed = f"{spatial_context['centroid_lat']}:{spatial_context['centroid_lon']}"
-
     yield_volatility = round(0.08 + _hash_ratio(volatility_seed) * 0.18, 3)
     yield_mean_index = round(0.85 + _hash_ratio(trend_seed) * 0.35, 3)
     trend_value = _hash_ratio(f"{trend_seed}:direction")
@@ -94,12 +127,7 @@ def get_agro_context(inputs: dict[str, Any], spatial_context: dict[str, Any]) ->
     else:
         yield_trend = "alta"
 
-    vegetation_stress_index = round(0.35 + _hash_ratio(territorial_seed) * 0.5, 3)
-    soil_water_buffer_index = round(0.25 + _hash_ratio(territorial_seed + ":soil") * 0.6, 3)
-    vulnerability_index = round(
-        (vegetation_stress_index * 0.55) + ((1.0 - soil_water_buffer_index) * 0.45),
-        3,
-    )
+    territorial_context = territorial_context_override or _build_fallback_territorial_context(spatial_context)
 
     return {
         "culture": culture,
@@ -108,17 +136,12 @@ def get_agro_context(inputs: dict[str, Any], spatial_context: dict[str, Any]) ->
         "crop_stage": crop_stage,
         "irrigated": irrigated,
         "zarc_flag": zarc_flag,
+        "zarc_context": zarc_context,
         "culture_profile": profile,
         "historical_yield_context": {
             "yield_mean_index": yield_mean_index,
             "yield_volatility": yield_volatility,
             "yield_trend": yield_trend,
         },
-        "territorial_context": {
-            "alphaearth_cluster": f"mt_cluster_{int(_hash_ratio(territorial_seed + ':cluster') * 5) + 1}",
-            "vegetation_stress_index": vegetation_stress_index,
-            "soil_water_buffer_index": soil_water_buffer_index,
-            "vulnerability_index": vulnerability_index,
-        },
+        "territorial_context": territorial_context,
     }
-

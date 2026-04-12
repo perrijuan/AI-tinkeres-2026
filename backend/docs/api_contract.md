@@ -30,6 +30,7 @@
   "summary": {},
   "metrics": {},
   "risk_flags": {},
+  "data_sources": {},
   "forecast_timeseries": [],
   "map_layer": {},
   "copilot_response": {}
@@ -45,4 +46,3 @@
 - `generate_alerts_and_recommendations(risk_result, climate_data, agro_context)`
 - `build_map_layer(inputs, risk_result)`
 - `build_frontend_response(...)`
-

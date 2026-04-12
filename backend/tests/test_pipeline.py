@@ -34,6 +34,7 @@ class PipelineTestCase(unittest.TestCase):
         self.assertIn("summary", result)
         self.assertIn("metrics", result)
         self.assertIn("risk_flags", result)
+        self.assertIn("data_sources", result)
         self.assertIn("forecast_timeseries", result)
         self.assertIn("map_layer", result)
         self.assertIn("copilot_response", result)
@@ -42,6 +43,9 @@ class PipelineTestCase(unittest.TestCase):
         self.assertGreaterEqual(result["summary"]["risk_score"], 0)
         self.assertLessEqual(result["summary"]["risk_score"], 100)
         self.assertEqual(len(result["forecast_timeseries"]), 14)
+        self.assertIn("wind_mean_7d_ms", result["metrics"])
+        self.assertIn("climate", result["data_sources"])
+        self.assertIn("satellite", result["data_sources"])
 
     def test_analysis_accepts_iso_string_dates(self) -> None:
         payload = {

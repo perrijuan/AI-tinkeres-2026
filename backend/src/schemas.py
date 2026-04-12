@@ -35,6 +35,8 @@ class FieldInfo(BaseModel):
     uf: str
     area_ha: float
     irrigated: bool
+    sowing_date: str
+    crop_stage: str
 
 
 class Summary(BaseModel):
@@ -52,6 +54,7 @@ class Metrics(BaseModel):
     temp_mean_7d_c: float
     temp_max_7d_c: float
     humidity_mean_7d_pct: float
+    wind_mean_7d_ms: float
 
 
 class RiskFlags(BaseModel):
@@ -79,6 +82,7 @@ class AnalysisResponse(BaseModel):
     summary: Summary
     metrics: Metrics
     risk_flags: RiskFlags
+    data_sources: dict[str, Any]
     forecast_timeseries: list[ForecastPoint]
     map_layer: MapLayer
     copilot_response: CopilotResponse

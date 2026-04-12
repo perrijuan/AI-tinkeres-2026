@@ -6,7 +6,9 @@
     "municipio": "Sorriso",
     "uf": "MT",
     "area_ha": 124.8,
-    "irrigated": false
+    "irrigated": false,
+    "sowing_date": "2026-10-15",
+    "crop_stage": "vegetativo"
   },
   "summary": {
     "risk_score": 78,
@@ -21,13 +23,58 @@
     "precip_forecast_14d_mm": 42.7,
     "temp_mean_7d_c": 28.1,
     "temp_max_7d_c": 34.6,
-    "humidity_mean_7d_pct": 61.2
+    "humidity_mean_7d_pct": 61.2,
+    "wind_mean_7d_ms": 3.6
   },
   "risk_flags": {
     "dry_risk_flag": true,
     "heat_risk_flag": true,
     "outside_zarc_flag": false,
     "vegetation_stress_flag": true
+  },
+  "data_sources": {
+    "climate": {
+      "provider": "Google Earth Engine",
+      "model": "NOAA/GFS0P25",
+      "coverage": "14 dias",
+      "signals": [
+        "Precipitacao acumulada 7d: 18.4 mm (GFS/GEE).",
+        "Temperatura maxima 7d: 34.6 C (GFS/GEE).",
+        "Umidade media 7d: 61.2% (GFS/GEE)."
+      ]
+    },
+    "satellite": {
+      "provider": "Google Earth Engine (MODIS/Sentinel-2)",
+      "last_image": "2026-04-10T10:22:00Z",
+      "cloud_cover_pct": 8.0,
+      "signals": [
+        "NDVI medio recente: 0.52 (MOD13Q1).",
+        "EVI medio recente: 0.44 (MOD13Q1).",
+        "LST medio recente: 38.2 C (MOD11A2)."
+      ],
+      "ndvi_timeseries": [
+        { "date": "2026-03-01", "ndvi": 0.71 },
+        { "date": "2026-03-11", "ndvi": 0.68 }
+      ]
+    },
+    "zarc": {
+      "provider": "MAPA ZARC (dataset local)",
+      "zarc_class": 3,
+      "zarc_label": "Moderado",
+      "planting_within_window": true,
+      "signals": [
+        "Risco medio de plantio no ZARC local: 27.5%.",
+        "Classificacao ZARC local: Moderado."
+      ]
+    },
+    "historical": {
+      "provider": "IBGE/PAM (placeholder MVP)",
+      "period": "baseline municipal",
+      "signals": [
+        "Indice medio de produtividade historica: 0.95.",
+        "Volatilidade historica de produtividade: 0.14."
+      ]
+    }
   },
   "forecast_timeseries": [
     {
