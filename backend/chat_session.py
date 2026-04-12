@@ -94,7 +94,7 @@ def send_message(conversation_id: str, message: str) -> dict:
 
     genai.configure(api_key=api_key)
     model = genai.GenerativeModel(
-        "gemini-1.5-flash",
+        "gemini-3.1-flash-lite-preview",
         system_instruction=conv["system"],
     )
 
