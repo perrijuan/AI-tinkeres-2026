@@ -19,7 +19,7 @@ export default function BrandLogo({
       )}
     >
       <img
-        src="/logo.jpeg"
+        src="/logo.png"
         alt={alt}
         className={cn("h-full w-full rounded-[0.7rem] object-cover", imageClassName)}
       />
