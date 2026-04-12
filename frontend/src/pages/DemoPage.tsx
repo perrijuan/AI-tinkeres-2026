@@ -172,24 +172,24 @@ export default function DemoPage() {
   }
 
   return (
-    <div className="h-screen flex flex-col bg-background overflow-hidden">
+    <div className="flex min-h-dvh flex-col bg-background lg:h-screen lg:overflow-hidden">
 
       {/* ── Header ── */}
       <header className="shrink-0 border-b bg-background/95 backdrop-blur-sm z-50">
-        <div className="h-14 px-6 flex items-center justify-between max-w-7xl mx-auto w-full">
-          <Link to="/" className="flex items-center gap-2">
+        <div className="mx-auto flex min-h-14 w-full max-w-7xl items-center justify-between gap-3 px-3 sm:px-4 lg:px-6">
+          <Link to="/" className="flex min-w-0 items-center gap-2">
             <BrandLogo className="h-8 w-8 rounded-[0.95rem]" imageClassName="rounded-[0.7rem]" />
             <span className="font-bold text-sm">SafraViva</span>
           </Link>
 
           {/* Stepper */}
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 items-center gap-1 overflow-x-auto px-1 py-1 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {STEPS.map((s, i) => {
               const Icon = s.icon
               const done = step > s.id
               const active = step === s.id
               return (
-                <div key={s.id} className="flex items-center gap-2">
+                <div key={s.id} className="flex shrink-0 items-center gap-1.5">
                   <div className="flex items-center gap-1.5">
                     <div className={cn(
                       "w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors",
@@ -207,14 +207,14 @@ export default function DemoPage() {
                     </span>
                   </div>
                   {i < STEPS.length - 1 && (
-                    <div className={cn("w-8 h-px", done ? "bg-primary" : "bg-border")} />
+                    <div className={cn("h-px w-5 sm:w-8", done ? "bg-primary" : "bg-border")} />
                   )}
                 </div>
               )
             })}
           </div>
 
-          <Button variant="ghost" size="sm" asChild>
+          <Button variant="ghost" size="sm" className="shrink-0" asChild>
             <Link to="/" className="gap-1.5 text-muted-foreground">
               <ArrowLeft className="w-3.5 h-3.5" />
               <span className="hidden sm:block">Voltar</span>
@@ -227,7 +227,7 @@ export default function DemoPage() {
 
       {/* Step 1: Dados pessoais */}
       {step === 1 && (
-        <div className="flex-1 flex items-center justify-center p-6">
+        <div className="flex flex-1 items-center justify-center p-4 sm:p-6">
           <div className="w-full max-w-md space-y-6">
             <div className="text-center">
               <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-3">
@@ -297,7 +297,7 @@ export default function DemoPage() {
 
       {/* Step 2: Cultura */}
       {step === 2 && (
-        <div className="flex-1 flex flex-col items-center justify-center p-6 gap-6 overflow-y-auto">
+        <div className="flex flex-1 flex-col items-center justify-center gap-5 overflow-y-auto p-4 sm:gap-6 sm:p-6">
           <div className="text-center">
             <div className="w-12 h-12 bg-primary/10 rounded-2xl flex items-center justify-center mx-auto mb-3">
               <Sprout className="w-6 h-6 text-primary" />
@@ -308,7 +308,7 @@ export default function DemoPage() {
             </p>
           </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 w-full max-w-2xl">
+          <div className="grid w-full max-w-2xl grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-5">
             {culturas.map((c) => (
               <button
                 key={c.id}
@@ -332,8 +332,8 @@ export default function DemoPage() {
             ))}
           </div>
 
-          <div className="flex gap-3 w-full max-w-2xl">
-            <Button variant="outline" className="gap-2" onClick={() => setStep(1)}>
+          <div className="flex w-full max-w-2xl flex-col gap-3 sm:flex-row">
+            <Button variant="outline" className="gap-2 sm:w-auto" onClick={() => setStep(1)}>
               <ArrowLeft className="w-4 h-4" />
               Voltar
             </Button>
@@ -389,10 +389,10 @@ export default function DemoPage() {
           </MapContainer>
 
           {/* Painel flutuante: topo esquerdo — controles */}
-          <div className="absolute top-4 left-4 z-1000 flex gap-2">
+          <div className="absolute left-3 right-3 top-3 z-1000 flex flex-wrap gap-2 sm:left-4 sm:right-auto sm:top-4">
             <button
               onClick={() => setStep(2)}
-              className="flex items-center gap-1.5 bg-background/95 backdrop-blur-sm border rounded-lg px-3 py-2 text-sm font-medium shadow hover:bg-accent transition-colors"
+              className="flex min-h-10 items-center gap-1.5 rounded-lg border bg-background/95 px-3 py-2 text-sm font-medium shadow backdrop-blur-sm transition-colors hover:bg-accent"
             >
               <ArrowLeft className="w-3.5 h-3.5" />
               Voltar
@@ -400,7 +400,7 @@ export default function DemoPage() {
             <button
               onClick={undo}
               disabled={points.length === 0}
-              className="flex items-center gap-1.5 bg-background/95 backdrop-blur-sm border rounded-lg px-3 py-2 text-sm font-medium shadow hover:bg-accent transition-colors disabled:opacity-40 disabled:pointer-events-none"
+              className="flex min-h-10 items-center gap-1.5 rounded-lg border bg-background/95 px-3 py-2 text-sm font-medium shadow backdrop-blur-sm transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-40"
             >
               <Undo2 className="w-3.5 h-3.5" />
               Desfazer
@@ -408,7 +408,7 @@ export default function DemoPage() {
             <button
               onClick={clear}
               disabled={points.length === 0}
-              className="flex items-center gap-1.5 bg-background/95 backdrop-blur-sm border rounded-lg px-3 py-2 text-sm font-medium shadow text-destructive hover:bg-destructive/10 transition-colors disabled:opacity-40 disabled:pointer-events-none"
+              className="flex min-h-10 items-center gap-1.5 rounded-lg border bg-background/95 px-3 py-2 text-sm font-medium text-destructive shadow backdrop-blur-sm transition-colors hover:bg-destructive/10 disabled:pointer-events-none disabled:opacity-40"
             >
               <Trash2 className="w-3.5 h-3.5" />
               Limpar
@@ -416,14 +416,14 @@ export default function DemoPage() {
           </div>
 
           {/* Instrução flutuante: topo centro */}
-          <div className="absolute top-4 left-1/2 -translate-x-1/2 z-1000">
-            <div className="bg-background/95 backdrop-blur-sm border rounded-full px-4 py-1.5 text-xs text-muted-foreground shadow">
+          <div className="absolute left-3 right-3 top-20 z-1000 sm:left-1/2 sm:right-auto sm:top-4 sm:-translate-x-1/2">
+            <div className="rounded-2xl border bg-background/95 px-4 py-2 text-center text-xs text-muted-foreground shadow backdrop-blur-sm sm:rounded-full sm:py-1.5">
               Clique no mapa para marcar os vértices da área
             </div>
           </div>
 
           {/* Painel flutuante: rodapé — resumo + confirmar */}
-          <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-1000 w-full max-w-sm px-4">
+          <div className="absolute bottom-4 left-1/2 z-1000 w-full max-w-sm -translate-x-1/2 px-3 sm:bottom-6 sm:px-4">
             <div className="bg-background/95 backdrop-blur-sm border rounded-2xl shadow-lg p-4 space-y-3">
               {points.length >= 3 ? (
                 <>

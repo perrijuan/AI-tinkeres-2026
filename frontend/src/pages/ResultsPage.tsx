@@ -534,7 +534,7 @@ function ForecastTable({
 
   return (
     <div className="overflow-x-auto rounded-xl border">
-      <table className="w-full min-w-[34rem] text-left text-sm">
+      <table className="w-full min-w-[30rem] text-left text-sm sm:min-w-[34rem]">
         <thead className="bg-muted/50 text-[11px] uppercase tracking-wide text-muted-foreground">
           <tr>
             <th className="px-3 py-2 font-medium">Dia</th>
@@ -801,7 +801,7 @@ function FieldMap({
           {!chatOpen && (
             <button
               onClick={onOpenChat}
-              className="absolute top-3 right-3 z-1000 flex items-center gap-2 rounded-full bg-primary px-3 py-2 text-xs font-medium text-primary-foreground shadow-lg transition-all hover:bg-primary/90 sm:bottom-4 sm:top-auto sm:px-4 sm:py-3 sm:text-sm"
+              className="absolute top-3 right-3 z-1000 flex min-h-10 items-center gap-2 rounded-full bg-primary px-3 py-2 text-xs font-medium text-primary-foreground shadow-lg transition-all hover:bg-primary/90 sm:bottom-4 sm:top-auto sm:px-4 sm:py-3 sm:text-sm"
             >
               <MessageCircle className="h-4 w-4" />
               Safrinia
@@ -814,7 +814,7 @@ function FieldMap({
                 "flex flex-col overflow-hidden border bg-background shadow-2xl transition-all duration-300",
                 chatFullscreen
                   ? "fixed inset-0 z-9999 rounded-none"
-                  : "absolute inset-x-3 bottom-3 z-1000 h-[min(32rem,calc(100%-1.5rem))] rounded-lg sm:right-4 sm:left-auto sm:h-130 sm:w-95"
+                  : "absolute inset-x-3 bottom-3 z-1000 h-[min(34rem,calc(100%-1.5rem))] rounded-lg sm:right-4 sm:left-auto sm:h-130 sm:w-95"
               )}
             >
               <ChatPanel
@@ -968,7 +968,7 @@ export default function ResultsPage() {
 
   return (
     <TooltipProvider>
-      <div className="flex min-h-dvh flex-col bg-background lg:h-screen lg:overflow-hidden">
+      <div className="flex min-h-dvh flex-col overflow-x-hidden bg-background lg:h-screen lg:overflow-hidden">
       {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur-sm z-50 shrink-0">
         <div className="container mx-auto flex min-h-14 max-w-full items-center justify-between gap-3 px-3 py-2 sm:px-4">
@@ -984,10 +984,10 @@ export default function ResultsPage() {
       </header>
 
       {/* Layout: painel esquerdo com scroll + mapa fixo à direita */}
-      <div className="flex-1 flex overflow-hidden min-h-0">
+      <div className="flex min-h-0 flex-1 flex-col overflow-visible lg:flex-row lg:overflow-hidden">
 
         {/* ── Painel esquerdo: scroll ── */}
-        <div className="min-h-0 w-full shrink-0 overflow-y-auto border-r lg:w-130 xl:w-145">
+        <div className="min-h-0 w-full shrink-0 overflow-y-auto lg:border-r lg:w-130 xl:w-145">
           <div className="space-y-4 p-3 sm:space-y-5 sm:p-5">
 
             {/* Hero: Score + Info */}
@@ -1024,7 +1024,7 @@ export default function ResultsPage() {
 
               <Separator className="my-3" />
 
-              <div className="grid grid-cols-[6.5rem_minmax(0,1fr)] gap-x-3 gap-y-1 text-xs sm:grid-cols-2 sm:gap-x-4">
+              <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] gap-x-2.5 gap-y-1 text-xs sm:grid-cols-2 sm:gap-x-4">
                 <span className="text-muted-foreground">Propriedade</span>
                 <span className="font-medium truncate">{field_info.property_name}</span>
                 <span className="text-muted-foreground">Cultura</span>
@@ -1058,7 +1058,7 @@ export default function ResultsPage() {
                 onOpenChat={() => setChatOpen(true)}
                 onCloseChat={() => { setChatOpen(false); setChatFullscreen(false) }}
                 onToggleFullscreen={() => setChatFullscreen((f) => !f)}
-                className="h-[48vh] min-h-80 rounded-lg border"
+                className="h-[52vh] min-h-[24rem] rounded-lg border sm:min-h-80"
               />
             </div>
 
@@ -1450,27 +1450,27 @@ export default function ResultsPage() {
               </CardHeader>
               <CardContent>
                 <div className="overflow-hidden rounded-xl border">
-                  <table className="w-full text-left text-sm">
+                  <table className="w-full table-fixed text-left text-sm">
                     <tbody>
                       <tr className="border-b">
-                        <td className="bg-muted/40 px-3 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Área</td>
-                        <td className="px-3 py-2 font-medium">{fmtValue(field_info.area_ha, 2)} ha</td>
+                        <td className="w-[42%] bg-muted/40 px-3 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground sm:w-[34%]">Área</td>
+                        <td className="break-words px-3 py-2 font-medium">{fmtValue(field_info.area_ha, 2)} ha</td>
                       </tr>
                       <tr className="border-b">
                         <td className="bg-muted/40 px-3 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Local</td>
-                        <td className="px-3 py-2 font-medium">{field_info.municipio}, {field_info.uf}</td>
+                        <td className="break-words px-3 py-2 font-medium">{field_info.municipio}, {field_info.uf}</td>
                       </tr>
                       <tr className="border-b">
                         <td className="bg-muted/40 px-3 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Plantio</td>
-                        <td className="px-3 py-2 font-medium">{fmtDate(field_info.sowing_date)}</td>
+                        <td className="break-words px-3 py-2 font-medium">{fmtDate(field_info.sowing_date)}</td>
                       </tr>
                       <tr className="border-b">
                         <td className="bg-muted/40 px-3 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">Estágio</td>
-                        <td className="px-3 py-2 font-medium">{stageName(field_info.crop_stage)}</td>
+                        <td className="break-words px-3 py-2 font-medium">{stageName(field_info.crop_stage)}</td>
                       </tr>
                       <tr>
                         <td className="bg-muted/40 px-3 py-2 text-xs font-medium uppercase tracking-wide text-muted-foreground">ZARC</td>
-                        <td className="px-3 py-2">
+                        <td className="break-words px-3 py-2">
                           <span className={cn("rounded-full border px-2 py-1 text-xs font-medium", riskTone(!dataSources.zarc.planting_within_window))}>
                             {dataSources.zarc.planting_within_window ? "Dentro da janela" : "Fora da janela"}
                           </span>

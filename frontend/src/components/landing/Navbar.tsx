@@ -41,13 +41,13 @@ export default function Navbar() {
           : "bg-transparent"
       )}
     >
-      <nav className="container mx-auto max-w-7xl px-4 h-16 flex items-center justify-between">
-        <a href="/" className="flex items-center gap-2.5">
+      <nav className="container mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 px-4">
+        <a href="/" className="flex min-w-0 items-center gap-2.5">
           <BrandLogo className="h-9 w-9 rounded-[1rem]" imageClassName="rounded-[0.8rem]" />
-          <div className="leading-none">
+          <div className="min-w-0 leading-none">
             <span
               className={cn(
-                "font-bold text-base block transition-colors",
+                "block truncate font-bold text-base transition-colors",
                 scrolled ? "text-foreground" : "text-white"
               )}
             >
@@ -55,7 +55,7 @@ export default function Navbar() {
             </span>
             <span
               className={cn(
-                "text-[10px] block transition-colors",
+                "block truncate text-[10px] transition-colors",
                 scrolled ? "text-muted-foreground" : "text-white/60"
               )}
             >
@@ -85,7 +85,7 @@ export default function Navbar() {
           </NavigationMenu>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex shrink-0 items-center gap-2">
           <Button className="hidden md:flex" asChild>
             <Link to="/solicitar-demo">Solicitar Demo</Link>
           </Button>
@@ -103,7 +103,7 @@ export default function Navbar() {
                 <Menu className="w-5 h-5" />
               </Button>
             </SheetTrigger>
-            <SheetContent side="right" className="w-72">
+            <SheetContent side="right" className="w-[85vw] max-w-72">
               <div className="flex items-center gap-2.5 mb-6 mt-2">
                 <BrandLogo className="h-9 w-9 rounded-[1rem]" imageClassName="rounded-[0.8rem]" />
                 <span className="font-bold text-base">SafraViva</span>
