@@ -455,15 +455,7 @@ export default function ResultsPage() {
   }
 
   const risk = RISK_CONFIG[data.summary.risk_level] ?? RISK_CONFIG.moderado
-  const { metrics, risk_flags, forecast_timeseries, copilot_response, field_info, summary } = data
-  
-  // Valores padrão para data_sources se não existir
-  const dataSources = (data as any).data_sources || {
-    climate: { provider: "GFS", model: "MVP", coverage: "MT", signals: [] },
-    satellite: { provider: "Sentinel", last_image: new Date().toISOString(), cloud_cover_pct: 0, signals: [], ndvi_timeseries: [] },
-    zarc: { provider: "CONAB", zarc_class: 1, zarc_label: "Favorável", planting_within_window: true, signals: [] },
-    historical: { provider: "ERA5", period: "1989-2023", signals: [] },
-  }
+  const { metrics, risk_flags, forecast_timeseries, copilot_response, field_info, summary, data_sources: dataSources } = data
 
   const forecastChart = forecast_timeseries.map((d) => ({
     dia: fmtDate(d.forecast_time),
@@ -555,12 +547,10 @@ export default function ResultsPage() {
                 <span className="font-medium">{cultureName(field_info.culture)} · {field_info.area_ha} ha</span>
                 <span className="text-muted-foreground">Município</span>
                 <span className="font-medium">{field_info.municipio}, {field_info.uf}</span>
-                {field_info.crop_stage && (
-                  <>
-                    <span className="text-muted-foreground">Estágio</span>
-                    <span className="font-medium">{stageName(field_info.crop_stage)}</span>
-                  </>
-                )}
+                <span className="text-muted-foreground">Plantio</span>
+                <span className="font-medium">{fmtDate(field_info.sowing_date)}</span>
+                <span className="text-muted-foreground">Estágio</span>
+                <span className="font-medium">{stageName(field_info.crop_stage)}</span>
               </div>
             </div>
 
@@ -579,9 +569,7 @@ export default function ResultsPage() {
               <MetricCard icon={Thermometer} label="Temp. máxima 7d" value={metrics.temp_max_7d_c} unit="°C"
                 sub={`Média: ${metrics.temp_mean_7d_c} °C`} highlight={risk_flags.heat_risk_flag} />
               <MetricCard icon={Droplets} label="Umidade 7d" value={metrics.humidity_mean_7d_pct} unit="%" />
-              {(metrics as any).wind_mean_7d_ms !== undefined && (
-                <MetricCard icon={Wind} label="Vento 7d" value={(metrics as any).wind_mean_7d_ms} unit="m/s" />
-              )}
+              <MetricCard icon={Wind} label="Vento 7d" value={metrics.wind_mean_7d_ms} unit="m/s" />
             </div>
 
             {/* Gráfico previsão */}
