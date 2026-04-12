@@ -2,7 +2,7 @@
  * Configurações do Frontend
  */
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:8000"
+export const API_BASE_URL = "https://honest-magic-production-3078.up.railway.app"
 
 export const API_ENDPOINTS = {
   // V1 Endpoints (novo contrato)

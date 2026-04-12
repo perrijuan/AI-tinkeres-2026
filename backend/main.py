@@ -13,7 +13,11 @@ app = FastAPI(title="SafraViva API", version="0.2.0")
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:3000"],
+    allow_origins=[
+        "http://localhost:5173",
+        "http://localhost:3000",
+        "https://ai-tinkeres-2026-production.up.railway.app",
+    ],
     allow_methods=["*"],
     allow_headers=["*"],
 )
