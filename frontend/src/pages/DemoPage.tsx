@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { cn } from "@/lib/utils"
+import { API_ENDPOINTS } from "@/config"
 import {
   Leaf,
   ArrowLeft,
@@ -45,12 +46,6 @@ function calcAreaHa(pts: LatLng[]): number {
   return Math.abs((area * R * R) / 2) / 10000
 }
 
-function calcCentroid(pts: LatLng[]) {
-  return {
-    lat: pts.reduce((s, p) => s + p.lat, 0) / pts.length,
-    lng: pts.reduce((s, p) => s + p.lng, 0) / pts.length,
-  }
-}
 
 function MapClickHandler({ onClick }: { onClick: (ll: LatLng) => void }) {
   useMapEvents({ click: (e) => onClick(e.latlng) })
@@ -86,9 +81,12 @@ export default function DemoPage() {
   const [culturas, setCulturas] = useState<Cultura[]>([])
   const [points, setPoints] = useState<LatLng[]>([])
   const [loading, setLoading] = useState(false)
+  const [sowingDate, setSowingDate] = useState(
+    new Date().toISOString().split("T")[0]
+  )
 
   useEffect(() => {
-    fetch("http://localhost:8000/culturas")
+    fetch(API_ENDPOINTS.culturas)
       .then((r) => r.json())
       .then(setCulturas)
       .catch(() => {})
@@ -121,45 +119,43 @@ export default function DemoPage() {
     if (!canConfirm) return
     setLoading(true)
 
-    const centroide = calcCentroid(points)
+    // Novo payload conforme contrato API
+    const geometryCoords = [
+      ...points.map((p) => [p.lng, p.lat]),
+      [points[0].lng, points[0].lat],
+    ]
+    
     const payload = {
-      nome, empresa, email, cultura,
-      poligono: {
-        coordenadas: points.map((p) => [p.lat, p.lng]),
-        geoJSON: {
-          type: "Feature",
-          geometry: {
-            type: "Polygon",
-            coordinates: [[
-              ...points.map((p) => [p.lng, p.lat]),
-              [points[0].lng, points[0].lat],
-            ]],
-          },
-          properties: { areaHa: parseFloat(areaHa.toFixed(2)), centroide },
-        },
-        centroide,
-        areaHa: parseFloat(areaHa.toFixed(2)),
-        bbox: {
-          norte: Math.max(...points.map((p) => p.lat)),
-          sul:   Math.min(...points.map((p) => p.lat)),
-          leste: Math.max(...points.map((p) => p.lng)),
-          oeste: Math.min(...points.map((p) => p.lng)),
-        },
-        totalPontos: points.length,
+      field_id: `${nome.replace(/\s+/g, "_").toLowerCase()}_${Date.now()}`,
+      property_name: empresa || nome,
+      culture: cultura,
+      sowing_date: sowingDate,
+      crop_stage: null,
+      irrigated: false,
+      analysis_timestamp: new Date().toISOString(),
+      geometry: {
+        type: "Polygon",
+        coordinates: [geometryCoords],
       },
-      timestamp: new Date().toISOString(),
     }
 
     try {
-      const res = await fetch("http://localhost:8000/mock/analysis", {
+      const res = await fetch(API_ENDPOINTS.analysis, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
       })
+      
+      if (!res.ok) {
+        const error = await res.json()
+        throw new Error(error.detail || "Erro ao analisar")
+      }
+      
       const analysis = await res.json()
       navigate("/resultado", { state: { analysis } })
-    } catch {
-      navigate("/resultado", { state: { analysis: null } })
+    } catch (err) {
+      console.error("Erro na análise:", err)
+      navigate("/resultado", { state: { analysis: null, error: String(err) } })
     } finally {
       setLoading(false)
     }
@@ -266,6 +262,15 @@ export default function DemoPage() {
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   onKeyDown={(e) => e.key === "Enter" && canStep1 && setStep(2)}
+                />
+              </div>
+              <div className="space-y-1.5">
+                <Label htmlFor="sowingDate">Data de plantio</Label>
+                <Input
+                  id="sowingDate"
+                  type="date"
+                  value={sowingDate}
+                  onChange={(e) => setSowingDate(e.target.value)}
                 />
               </div>
             </div>

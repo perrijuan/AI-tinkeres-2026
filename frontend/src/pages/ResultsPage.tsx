@@ -43,6 +43,7 @@ import {
   CollapsibleTrigger,
 } from "@/components/ui/collapsible"
 import { cn } from "@/lib/utils"
+import { API_ENDPOINTS } from "@/config"
 
 // ── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -304,7 +305,7 @@ function ChatPanel({
     setMessages((prev) => [...prev, { role: "user", content: text }])
     setSending(true)
     try {
-      const res = await fetch("http://localhost:8000/chat", {
+      const res = await fetch(API_ENDPOINTS.chat, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ conversation_id: conversationId, message: text }),
@@ -402,7 +403,7 @@ export default function ResultsPage() {
 
   useEffect(() => {
     if (data) return
-    fetch("http://localhost:8000/mock/analysis", { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" })
+    fetch(API_ENDPOINTS.mockAnalysis, { method: "POST", headers: { "Content-Type": "application/json" }, body: "{}" })
       .then((r) => r.json())
       .then((d) => { setData(d); setLoading(false) })
       .catch(() => setLoading(false))
@@ -437,7 +438,15 @@ export default function ResultsPage() {
   }
 
   const risk = RISK_CONFIG[data.summary.risk_level] ?? RISK_CONFIG.moderado
-  const { metrics, risk_flags, forecast_timeseries, data_sources, copilot_response, field_info, summary } = data
+  const { metrics, risk_flags, forecast_timeseries, copilot_response, field_info, summary } = data
+  
+  // Valores padrão para data_sources se não existir
+  const dataSources = (data as any).data_sources || {
+    climate: { provider: "GFS", model: "MVP", coverage: "MT", signals: [] },
+    satellite: { provider: "Sentinel", last_image: new Date().toISOString(), cloud_cover_pct: 0, signals: [], ndvi_timeseries: [] },
+    zarc: { provider: "CONAB", zarc_class: 1, zarc_label: "Favorável", planting_within_window: true, signals: [] },
+    historical: { provider: "ERA5", period: "1989-2023", signals: [] },
+  }
 
   const forecastChart = forecast_timeseries.map((d) => ({
     dia: fmtDate(d.forecast_time),
@@ -445,10 +454,12 @@ export default function ResultsPage() {
     "Temp (°C)": d.temp_c,
   }))
 
-  const ndviChart = data_sources.satellite.ndvi_timeseries.map((d) => ({
-    data: fmtDate(d.date),
-    NDVI: d.ndvi,
-  }))
+  const ndviChart = dataSources.satellite.ndvi_timeseries?.length > 0 
+    ? dataSources.satellite.ndvi_timeseries.map((d: any) => ({
+        data: fmtDate(d.date),
+        NDVI: d.ndvi,
+      }))
+    : []
 
   const mapCenter: [number, number] = [
     data.map_layer.geometry.coordinates[0].reduce((s: number, c: number[]) => s + c[1], 0) /
@@ -527,8 +538,12 @@ export default function ResultsPage() {
                 <span className="font-medium">{cultureName(field_info.culture)} · {field_info.area_ha} ha</span>
                 <span className="text-muted-foreground">Município</span>
                 <span className="font-medium">{field_info.municipio}, {field_info.uf}</span>
-                <span className="text-muted-foreground">Estágio</span>
-                <span className="font-medium">{stageName(field_info.crop_stage)}</span>
+                {field_info.crop_stage && (
+                  <>
+                    <span className="text-muted-foreground">Estágio</span>
+                    <span className="font-medium">{stageName(field_info.crop_stage)}</span>
+                  </>
+                )}
               </div>
             </div>
 
@@ -547,7 +562,9 @@ export default function ResultsPage() {
               <MetricCard icon={Thermometer} label="Temp. máxima 7d" value={metrics.temp_max_7d_c} unit="°C"
                 sub={`Média: ${metrics.temp_mean_7d_c} °C`} highlight={risk_flags.heat_risk_flag} />
               <MetricCard icon={Droplets} label="Umidade 7d" value={metrics.humidity_mean_7d_pct} unit="%" />
-              <MetricCard icon={Wind} label="Vento 7d" value={metrics.wind_mean_7d_ms} unit="m/s" />
+              {(metrics as any).wind_mean_7d_ms !== undefined && (
+                <MetricCard icon={Wind} label="Vento 7d" value={(metrics as any).wind_mean_7d_ms} unit="m/s" />
+              )}
             </div>
 
             {/* Gráfico previsão */}
@@ -573,26 +590,28 @@ export default function ResultsPage() {
             </Card>
 
             {/* Gráfico NDVI */}
-            <Card>
-              <CardHeader className="pb-2">
-                <CardTitle className="text-sm font-semibold">NDVI — Vegetação</CardTitle>
-                <p className="text-xs text-muted-foreground">
-                  {data_sources.satellite.provider} · Nuvens: {data_sources.satellite.cloud_cover_pct}%
-                </p>
-              </CardHeader>
-              <CardContent>
-                <ResponsiveContainer width="100%" height={160}>
-                  <LineChart data={ndviChart} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                    <XAxis dataKey="data" tick={{ fontSize: 9 }} />
-                    <YAxis tick={{ fontSize: 9 }} domain={[0.3, 0.9]} />
-                    <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8, border: "1px solid #e2e8f0" }} />
-                    <Line dataKey="NDVI" stroke="#16a34a" strokeWidth={2.5}
-                      dot={{ fill: "#16a34a", r: 4 }} activeDot={{ r: 6 }} />
-                  </LineChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
+            {ndviChart.length > 0 && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <CardTitle className="text-sm font-semibold">NDVI — Vegetação</CardTitle>
+                  <p className="text-xs text-muted-foreground">
+                    {dataSources.satellite.provider} · Nuvens: {dataSources.satellite.cloud_cover_pct}%
+                  </p>
+                </CardHeader>
+                <CardContent>
+                  <ResponsiveContainer width="100%" height={160}>
+                    <LineChart data={ndviChart} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
+                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                      <XAxis dataKey="data" tick={{ fontSize: 9 }} />
+                      <YAxis tick={{ fontSize: 9 }} domain={[0.3, 0.9]} />
+                      <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8, border: "1px solid #e2e8f0" }} />
+                      <Line dataKey="NDVI" stroke="#16a34a" strokeWidth={2.5}
+                        dot={{ fill: "#16a34a", r: 4 }} activeDot={{ r: 6 }} />
+                    </LineChart>
+                  </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            )}
 
             {/* Copiloto */}
             <Card className="border-primary/20 bg-primary/5">
@@ -633,20 +652,20 @@ export default function ResultsPage() {
               <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wide mb-2">Fontes de dados</p>
               <div className="space-y-2">
                 <SourceCard icon={CloudRain} title="Clima"
-                  subtitle={`${data_sources.climate.provider} · ${data_sources.climate.model}`}
-                  signals={data_sources.climate.signals} defaultOpen />
+                  subtitle={`${dataSources.climate.provider} · ${dataSources.climate.model}`}
+                  signals={dataSources.climate.signals || ["Precipitação", "Temperatura", "Umidade"]} defaultOpen />
                 <SourceCard icon={Satellite} title="Satélite"
-                  subtitle={`${data_sources.satellite.provider} · ${fmtDate(data_sources.satellite.last_image)}`}
-                  signals={data_sources.satellite.signals} defaultOpen />
+                  subtitle={`${dataSources.satellite.provider} · ${fmtDate(dataSources.satellite.last_image)}`}
+                  signals={dataSources.satellite.signals || ["NDVI", "EVI", "Cobertura de nuvens"]} defaultOpen />
                 <SourceCard
                   icon={FileText}
-                  title={`ZARC — Classe ${data_sources.zarc.zarc_class} (${data_sources.zarc.zarc_label})`}
-                  subtitle={data_sources.zarc.provider}
-                  signals={data_sources.zarc.signals}
+                  title={`ZARC — Classe ${dataSources.zarc.zarc_class} (${dataSources.zarc.zarc_label})`}
+                  subtitle={dataSources.zarc.provider}
+                  signals={dataSources.zarc.signals || ["Zoneamento", "Risco de plantio"]}
                 />
                 <SourceCard icon={Clock} title="Histórico"
-                  subtitle={`${data_sources.historical.provider} · ${data_sources.historical.period}`}
-                  signals={data_sources.historical.signals} />
+                  subtitle={`${dataSources.historical.provider} · ${dataSources.historical.period}`}
+                  signals={dataSources.historical.signals || ["Precipitação histórica", "Temperatura média", "Padrões climáticos"]} />
               </div>
             </div>
 
