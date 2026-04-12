@@ -27,11 +27,13 @@ def _build_data_sources(
         satellite_signals.append(f"Anomalia NDVI: {territory['ndvi_anomaly']}.")
 
     historical = agro_context["historical_yield_context"]
-    historical_signals = [
-        f"Indice medio de produtividade historica: {historical['yield_mean_index']}.",
-        f"Volatilidade historica de produtividade: {historical['yield_volatility']}.",
-        f"Tendencia historica observada: {historical['yield_trend']}.",
-    ]
+    historical_signals = list(historical.get("signals", []))
+    if not historical_signals:
+        historical_signals = [
+            f"Indice medio de produtividade historica: {historical['yield_mean_index']}.",
+            f"Volatilidade historica de produtividade: {historical['yield_volatility']}.",
+            f"Tendencia historica observada: {historical['yield_trend']}.",
+        ]
 
     return {
         "climate": {
@@ -91,8 +93,14 @@ def _build_data_sources(
             "signals": zarc_context.get("signals", []),
         },
         "historical": {
-            "provider": "IBGE/PAM (placeholder MVP)",
-            "period": "baseline municipal",
+            "provider": historical.get("provider", "IBGE/PAM"),
+            "source": historical.get("source", "unknown"),
+            "scope": historical.get("scope", "baseline municipal"),
+            "period_start": historical.get("period_start"),
+            "period_end": historical.get("period_end"),
+            "yield_mean_index": historical.get("yield_mean_index"),
+            "yield_volatility": historical.get("yield_volatility"),
+            "yield_trend": historical.get("yield_trend"),
             "signals": historical_signals,
         },
     }

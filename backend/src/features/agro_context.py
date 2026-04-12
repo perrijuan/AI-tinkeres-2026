@@ -3,6 +3,7 @@ import unicodedata
 from datetime import date, datetime
 from typing import Any
 
+from src.features.production_history import get_historical_yield_context
 from src.features.soil_context import get_soil_context
 from src.features.zarc_lookup import get_zarc_context
 from src.utils.time import ensure_utc
@@ -198,20 +199,20 @@ def get_agro_context(
 
     crop_stage = inputs.get("crop_stage") or _infer_crop_stage(sowing_date, analysis_timestamp)
     heuristic_zarc_flag = _in_zarc_window(sowing_date, profile["zarc_windows"])
-    zarc_context = get_zarc_context(culture_raw, municipio, sowing_date.isoformat(), heuristic_zarc_flag)
+    zarc_context = get_zarc_context(
+        culture=culture_raw,
+        municipio=municipio,
+        sowing_date=sowing_date.isoformat(),
+        heuristic_zarc_flag=heuristic_zarc_flag,
+        uf=spatial_context["uf"],
+    )
     zarc_flag = bool(zarc_context["zarc_flag"])
 
-    volatility_seed = f"{municipio}:{culture}:volatility"
-    trend_seed = f"{municipio}:{culture}:trend"
-    yield_volatility = round(0.08 + _hash_ratio(volatility_seed) * 0.18, 3)
-    yield_mean_index = round(0.85 + _hash_ratio(trend_seed) * 0.35, 3)
-    trend_value = _hash_ratio(f"{trend_seed}:direction")
-    if trend_value < 0.33:
-        yield_trend = "queda"
-    elif trend_value < 0.66:
-        yield_trend = "estavel"
-    else:
-        yield_trend = "alta"
+    historical_yield_context = get_historical_yield_context(
+        culture=culture_raw,
+        municipio=municipio,
+        uf=spatial_context["uf"],
+    )
 
     territorial_context = territorial_context_override or _build_fallback_territorial_context(spatial_context)
     soil_context = get_soil_context(spatial_context)
@@ -226,11 +227,7 @@ def get_agro_context(
         "zarc_flag": zarc_flag,
         "zarc_context": zarc_context,
         "culture_profile": profile,
-        "historical_yield_context": {
-            "yield_mean_index": yield_mean_index,
-            "yield_volatility": yield_volatility,
-            "yield_trend": yield_trend,
-        },
+        "historical_yield_context": historical_yield_context,
         "soil_context": soil_context,
         "territorial_context": territorial_context,
     }
