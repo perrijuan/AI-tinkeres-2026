@@ -11,6 +11,7 @@ import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { Menu } from "lucide-react"
+import BrandLogo from "@/components/BrandLogo"
 import { cn } from "@/lib/utils"
 
 const navLinks = [
@@ -42,11 +43,7 @@ export default function Navbar() {
     >
       <nav className="container mx-auto max-w-7xl px-4 h-16 flex items-center justify-between">
         <a href="/" className="flex items-center gap-2.5">
-          <img
-            src="/logo.jpeg"
-            alt="Logo SafraViva"
-            className="h-8 w-8 shrink-0 rounded-lg object-cover"
-          />
+          <BrandLogo className="h-9 w-9 rounded-[1rem]" imageClassName="rounded-[0.8rem]" />
           <div className="leading-none">
             <span
               className={cn(
@@ -108,11 +105,7 @@ export default function Navbar() {
             </SheetTrigger>
             <SheetContent side="right" className="w-72">
               <div className="flex items-center gap-2.5 mb-6 mt-2">
-                <img
-                  src="/logo.jpeg"
-                  alt="Logo SafraViva"
-                  className="h-8 w-8 rounded-lg object-cover"
-                />
+                <BrandLogo className="h-9 w-9 rounded-[1rem]" imageClassName="rounded-[0.8rem]" />
                 <span className="font-bold text-base">SafraViva</span>
               </div>
               <Separator className="mb-4" />

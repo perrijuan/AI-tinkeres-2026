@@ -1,5 +1,6 @@
 import { Separator } from "@/components/ui/separator"
 import { Badge } from "@/components/ui/badge"
+import BrandLogo from "@/components/BrandLogo"
 
 const links = {
   Produto: [
@@ -19,11 +20,7 @@ export default function Footer() {
         <div className="grid md:grid-cols-4 gap-10 mb-12">
           <div className="space-y-4">
             <div className="flex items-center gap-2.5">
-              <img
-                src="/logo.jpeg"
-                alt="Logo SafraViva"
-                className="h-8 w-8 shrink-0 rounded-lg object-cover"
-              />
+              <BrandLogo className="h-9 w-9 rounded-[1rem] border-white/10 bg-white/95 shadow-[0_10px_28px_rgba(0,0,0,0.22)]" imageClassName="rounded-[0.8rem]" />
               <span className="font-bold text-white text-base">SafraViva</span>
             </div>
             <p className="text-sm leading-relaxed">

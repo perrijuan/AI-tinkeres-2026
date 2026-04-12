@@ -46,6 +46,7 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import BrandLogo from "@/components/BrandLogo"
 import {
   Collapsible,
   CollapsibleContent,
@@ -723,16 +724,12 @@ export default function ResultsPage() {
           <div className="flex w-full flex-col items-center text-center">
             <div className="relative mb-8 flex items-center justify-center">
               <div className="absolute h-28 w-28 rounded-full bg-primary/10 blur-2xl" />
-              <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-primary/15 bg-white shadow-lg">
+              <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-primary/15 bg-white shadow-lg dark:bg-white">
                 <div className="absolute h-20 w-20 animate-spin rounded-full border-2 border-primary/15 border-t-primary" />
                 <div className="absolute -right-2 -top-2 rounded-2xl bg-primary p-2 text-primary-foreground shadow-md animate-[bounce_1.8s_ease-in-out_infinite]">
                   <Bot className="h-4 w-4" />
                 </div>
-                <img
-                  src="/logo.jpeg"
-                  alt="Logo SafraViva"
-                  className="h-10 w-10 rounded-2xl object-cover animate-pulse"
-                />
+                <BrandLogo className="h-12 w-12 rounded-[1.1rem] p-1 shadow-md" imageClassName="rounded-[0.9rem]" />
               </div>
             </div>
 
@@ -830,11 +827,7 @@ export default function ResultsPage() {
       <header className="border-b bg-background/95 backdrop-blur-sm z-50 shrink-0">
         <div className="container mx-auto max-w-full px-4 h-14 flex items-center justify-between">
           <Link to="/" className="flex items-center gap-2">
-            <img
-              src="/logo.jpeg"
-              alt="Logo SafraViva"
-              className="h-7 w-7 shrink-0 rounded-lg object-cover"
-            />
+            <BrandLogo className="h-8 w-8 rounded-[0.95rem]" imageClassName="rounded-[0.7rem]" />
             <span className="font-bold text-sm">SafraViva</span>
           </Link>
           <Link to="/solicitar-demo" className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors">

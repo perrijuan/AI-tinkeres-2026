@@ -14,6 +14,7 @@ import "leaflet/dist/leaflet.css"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import BrandLogo from "@/components/BrandLogo"
 import { cn } from "@/lib/utils"
 import { API_ENDPOINTS } from "@/config"
 import {
@@ -167,11 +168,7 @@ export default function DemoPage() {
       <header className="shrink-0 border-b bg-background/95 backdrop-blur-sm z-50">
         <div className="h-14 px-6 flex items-center justify-between max-w-7xl mx-auto w-full">
           <Link to="/" className="flex items-center gap-2">
-            <img
-              src="/logo.jpeg"
-              alt="Logo SafraViva"
-              className="h-7 w-7 rounded-lg object-cover"
-            />
+            <BrandLogo className="h-8 w-8 rounded-[0.95rem]" imageClassName="rounded-[0.7rem]" />
             <span className="font-bold text-sm">SafraViva</span>
           </Link>
 
