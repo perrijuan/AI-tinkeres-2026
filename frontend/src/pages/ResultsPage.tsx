@@ -39,13 +39,16 @@ import {
   ShieldCheck,
   Activity,
   CircleHelp,
-  Sparkles,
-  Bot,
+  Waves,
+  TrendingDown,
+  TrendingUp,
+  Minus,
 } from "lucide-react"
 
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Separator } from "@/components/ui/separator"
+import AnalysisLoadingScreen from "@/components/AnalysisLoadingScreen"
 import BrandLogo from "@/components/BrandLogo"
 import {
   Collapsible,
@@ -100,12 +103,46 @@ interface AnalysisData {
   }
   data_sources: {
     climate: { provider: string; model: string; coverage: string; signals: string[] }
+    climate_history?: {
+      provider?: string
+      dataset?: string
+      window_start?: string
+      window_end?: string
+      latest_observed_date?: string
+      data_lag_days?: number | null
+      precip_observed_7d_mm?: number | null
+      precip_observed_30d_mm?: number | null
+      precip_climatology_30d_mm?: number | null
+      precip_anomaly_30d_mm?: number | null
+      precip_anomaly_30d_pct?: number | null
+      dry_days_30d?: number | null
+      timeseries_30d?: { date: string; precip_mm: number }[]
+      signals?: string[]
+    }
     satellite: {
       provider: string
       last_image: string
       cloud_cover_pct: number
+      ndvi_trend?: "increasing" | "decreasing" | "stable" | string
+      ndvi_delta_30d?: number
+      ndvi_anomaly?: number
+      vegetation_mismatch_flag?: boolean
       signals: string[]
       ndvi_timeseries: { date: string; ndvi: number }[]
+    }
+    soil?: {
+      provider?: string
+      source?: string
+      interpretation_scope?: string
+      temporal_nature?: string
+      short_term_reliability?: string
+      soil_quality_index?: number
+      soil_quality_label?: string
+      soil_good_flag?: boolean
+      confidence_index?: number
+      sample_count?: number
+      nearest_sample_km?: number | null
+      signals?: string[]
     }
     zarc: {
       provider: string
@@ -144,24 +181,15 @@ interface ChatMessage {
   content: string
 }
 
-const LOADING_MESSAGES = [
-  "Analisando o polígono da área e validando o recorte territorial…",
-  "Consultando sinais climáticos para os próximos 14 dias…",
-  "Processando indicadores de satélite e vigor da vegetação…",
-  "Conferindo aderência à janela ZARC para a cultura informada…",
-  "Calculando score de risco e organizando alertas principais…",
-  "Montando o resumo da Safrinia para facilitar a leitura da área…",
-]
-
 const MIN_LOADING_MS = 3000
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
 const RISK_CONFIG: Record<string, { label: string; color: string; bg: string; border: string; scoreColor: string }> = {
-  baixo:    { label: "Baixo",    color: "text-emerald-700", bg: "bg-emerald-50", border: "border-emerald-200", scoreColor: "#16a34a" },
-  moderado: { label: "Moderado", color: "text-amber-700",   bg: "bg-amber-50",   border: "border-amber-200",   scoreColor: "#d97706" },
-  alto:     { label: "Alto",     color: "text-red-700",     bg: "bg-red-50",     border: "border-red-200",     scoreColor: "#dc2626" },
-  crítico:  { label: "Crítico",  color: "text-red-900",     bg: "bg-red-100",    border: "border-red-300",     scoreColor: "#7f1d1d" },
+  baixo:    { label: "Baixo",    color: "text-emerald-700 dark:text-emerald-300", bg: "bg-emerald-50 dark:bg-emerald-950/35", border: "border-emerald-200 dark:border-emerald-950/60", scoreColor: "var(--primary)" },
+  moderado: { label: "Moderado", color: "text-amber-700 dark:text-amber-300",     bg: "bg-amber-50 dark:bg-amber-950/35",     border: "border-amber-200 dark:border-amber-950/60",     scoreColor: "#f59e0b" },
+  alto:     { label: "Alto",     color: "text-red-700 dark:text-red-300",         bg: "bg-red-50 dark:bg-red-950/35",         border: "border-red-200 dark:border-red-950/60",         scoreColor: "#ef4444" },
+  crítico:  { label: "Crítico",  color: "text-red-800 dark:text-red-200",         bg: "bg-red-100 dark:bg-red-950/45",        border: "border-red-300 dark:border-red-900/70",         scoreColor: "#f87171" },
 }
 
 function fmtDate(iso: string) {
@@ -208,8 +236,8 @@ function clamp(value: number, min: number, max: number) {
 
 function riskTone(active: boolean) {
   return active
-    ? "bg-red-50 text-red-700 border-red-200"
-    : "bg-emerald-50 text-emerald-700 border-emerald-200"
+    ? "border-red-200 bg-red-50 text-red-700 dark:border-red-950/60 dark:bg-red-950/35 dark:text-red-300"
+    : "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-950/60 dark:bg-emerald-950/35 dark:text-emerald-300"
 }
 
 function normalizeMetric(value: number, max: number) {
@@ -221,6 +249,46 @@ function forecastLabel(precip: number, temp: number) {
   if (precip < 5) return "Seco"
   if (temp >= 32) return "Calor"
   return "Estável"
+}
+
+function toTitle(value: string | undefined | null) {
+  if (!value) return "Nao informado"
+  return value.charAt(0).toUpperCase() + value.slice(1)
+}
+
+function providerQuality(provider?: string, source?: string) {
+  const providerText = (provider || "").toLowerCase()
+  const sourceText = (source || "").toLowerCase()
+  if (
+    providerText.includes("synthetic") ||
+    providerText.includes("heuristic") ||
+    sourceText.includes("fallback")
+  ) {
+    return "fallback"
+  }
+  return "real"
+}
+
+function trendMeta(trend?: string) {
+  if (trend === "increasing") {
+    return {
+      label: "NDVI em alta",
+      icon: TrendingUp,
+      className: "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-950/60 dark:bg-emerald-950/35 dark:text-emerald-300",
+    }
+  }
+  if (trend === "decreasing") {
+    return {
+      label: "NDVI em queda",
+      icon: TrendingDown,
+      className: "border-red-200 bg-red-50 text-red-700 dark:border-red-950/60 dark:bg-red-950/35 dark:text-red-300",
+    }
+  }
+  return {
+    label: "NDVI estável",
+    icon: Minus,
+    className: "border-border bg-muted text-muted-foreground dark:bg-muted/70",
+  }
 }
 
 function HelpTooltip({ text }: { text: string }) {
@@ -242,6 +310,27 @@ function HelpTooltip({ text }: { text: string }) {
   )
 }
 
+function DataQualityBadge({
+  provider,
+  source,
+}: {
+  provider?: string
+  source?: string
+}) {
+  const quality = providerQuality(provider, source)
+  const label = quality === "real" ? "Dado real" : "Fallback"
+  const className =
+    quality === "real"
+      ? "border-emerald-200 bg-emerald-50 text-emerald-700 dark:border-emerald-950/60 dark:bg-emerald-950/35 dark:text-emerald-300"
+      : "border-amber-200 bg-amber-50 text-amber-700 dark:border-amber-950/60 dark:bg-amber-950/35 dark:text-amber-300"
+
+  return (
+    <span className={cn("rounded-full border px-2 py-1 text-[11px] font-medium", className)}>
+      {label}
+    </span>
+  )
+}
+
 // ── Sub-componentes ───────────────────────────────────────────────────────────
 
 function MetricCard({
@@ -260,19 +349,19 @@ function MetricCard({
   highlight?: boolean
 }) {
   return (
-    <Card className={cn("relative overflow-hidden", highlight && "border-red-200")}>
+    <Card className={cn("relative overflow-hidden", highlight && "border-red-200 dark:border-red-950/60")}>
       <CardContent className="p-4">
         <div className="flex items-start justify-between">
           <div>
             <p className="text-xs text-muted-foreground mb-1">{label}</p>
-            <p className={cn("text-2xl font-bold", highlight ? "text-red-600" : "text-foreground")}>
+            <p className={cn("text-2xl font-bold", highlight ? "text-red-600 dark:text-red-300" : "text-foreground")}>
               {value}
               <span className="text-sm font-normal text-muted-foreground ml-1">{unit}</span>
             </p>
             {sub && <p className="text-xs text-muted-foreground mt-0.5">{sub}</p>}
           </div>
-          <div className={cn("p-2 rounded-lg", highlight ? "bg-red-50" : "bg-muted/50")}>
-            <Icon className={cn("w-4 h-4", highlight ? "text-red-500" : "text-muted-foreground")} />
+          <div className={cn("p-2 rounded-lg", highlight ? "bg-red-50 dark:bg-red-950/35" : "bg-muted/50")}>
+            <Icon className={cn("w-4 h-4", highlight ? "text-red-500 dark:text-red-300" : "text-muted-foreground")} />
           </div>
         </div>
       </CardContent>
@@ -303,12 +392,16 @@ function SourceCard({
   subtitle,
   signals,
   defaultOpen = false,
+  provider,
+  source,
 }: {
   icon: React.ElementType
   title: string
   subtitle: string
   signals: string[]
   defaultOpen?: boolean
+  provider?: string
+  source?: string
 }) {
   const [open, setOpen] = useState(defaultOpen)
   return (
@@ -326,7 +419,10 @@ function SourceCard({
                   <p className="text-xs text-muted-foreground mt-0.5">{subtitle}</p>
                 </div>
               </div>
-              <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform", open && "rotate-180")} />
+              <div className="flex items-center gap-2">
+                <DataQualityBadge provider={provider} source={source} />
+                <ChevronDown className={cn("w-4 h-4 text-muted-foreground transition-transform", open && "rotate-180")} />
+              </div>
             </div>
           </CardHeader>
         </CollapsibleTrigger>
@@ -365,9 +461,9 @@ function SignalMeter({
 }) {
   const toneClass =
     tone === "alert"
-      ? "bg-red-500"
+      ? "bg-red-500 dark:bg-red-400"
       : tone === "good"
-        ? "bg-emerald-500"
+        ? "bg-emerald-500 dark:bg-emerald-400"
         : "bg-primary"
 
   return (
@@ -404,16 +500,16 @@ function SummaryPanel({
 }) {
   const toneClass =
     tone === "alert"
-      ? "bg-red-50 border-red-200"
+      ? "border-red-200 bg-red-50 dark:border-red-950/60 dark:bg-red-950/35"
       : tone === "good"
-        ? "bg-emerald-50 border-emerald-200"
+        ? "border-emerald-200 bg-emerald-50 dark:border-emerald-950/60 dark:bg-emerald-950/35"
         : "bg-card border-border"
 
   const iconTone =
     tone === "alert"
-      ? "text-red-600 bg-red-100"
+      ? "bg-red-100 text-red-600 dark:bg-red-950/45 dark:text-red-300"
       : tone === "good"
-        ? "text-emerald-600 bg-emerald-100"
+        ? "bg-emerald-100 text-emerald-600 dark:bg-emerald-950/45 dark:text-emerald-300"
         : "text-primary bg-primary/10"
 
   return (
@@ -453,10 +549,10 @@ function ForecastTable({
             const label = forecastLabel(row.precip_mm, row.temp_c)
             const labelClass =
               label === "Mais crítico"
-                ? "bg-red-50 text-red-700"
+                ? "bg-red-50 text-red-700 dark:bg-red-950/35 dark:text-red-300"
                 : label === "Seco" || label === "Calor"
-                  ? "bg-amber-50 text-amber-700"
-                  : "bg-emerald-50 text-emerald-700"
+                  ? "bg-amber-50 text-amber-700 dark:bg-amber-950/35 dark:text-amber-300"
+                  : "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/35 dark:text-emerald-300"
 
             return (
               <tr key={row.forecast_time} className="border-t first:border-t-0">
@@ -474,6 +570,24 @@ function ForecastTable({
           })}
         </tbody>
       </table>
+    </div>
+  )
+}
+
+function DetailStat({
+  label,
+  value,
+  hint,
+}: {
+  label: string
+  value: string
+  hint?: string
+}) {
+  return (
+    <div className="rounded-xl border bg-card/80 p-3">
+      <p className="text-[11px] uppercase tracking-wide text-muted-foreground">{label}</p>
+      <p className="mt-1 text-lg font-semibold text-foreground">{value}</p>
+      {hint && <p className="mt-1 text-[11px] leading-relaxed text-muted-foreground">{hint}</p>}
     </div>
   )
 }
@@ -632,38 +746,13 @@ export default function ResultsPage() {
   const location = useLocation()
   const initialAnalysis =
     (location.state as { analysis?: AnalysisData } | null)?.analysis ?? null
-  const [data, setData] = useState<AnalysisData | null>(null)
-  const [loading, setLoading] = useState(true)
+  const [data, setData] = useState<AnalysisData | null>(initialAnalysis)
+  const [loading, setLoading] = useState(!initialAnalysis)
   const [chatOpen, setChatOpen] = useState(false)
   const [chatFullscreen, setChatFullscreen] = useState(false)
-  const [loadingStep, setLoadingStep] = useState(0)
-  const [typedLoadingText, setTypedLoadingText] = useState("")
 
   useEffect(() => {
-    const interval = window.setInterval(() => {
-      setLoadingStep((prev) => (prev + 1) % LOADING_MESSAGES.length)
-    }, 1200)
-
-    return () => window.clearInterval(interval)
-  }, [])
-
-  useEffect(() => {
-    const target = LOADING_MESSAGES[loadingStep]
-    let index = 0
-    setTypedLoadingText("")
-
-    const typing = window.setInterval(() => {
-      index += 1
-      setTypedLoadingText(target.slice(0, index))
-      if (index >= target.length) {
-        window.clearInterval(typing)
-      }
-    }, 28)
-
-    return () => window.clearInterval(typing)
-  }, [loadingStep])
-
-  useEffect(() => {
+    if (initialAnalysis) return
     let cancelled = false
 
     async function loadDashboard() {
@@ -718,53 +807,7 @@ export default function ResultsPage() {
   }, [])
 
   if (loading) {
-    return (
-      <div className="min-h-screen overflow-hidden bg-[radial-gradient(circle_at_top,_rgba(22,163,74,0.10),_transparent_35%),linear-gradient(180deg,#fbfdfb_0%,#f4f8f4_100%)]">
-        <div className="mx-auto flex min-h-screen max-w-4xl items-center justify-center px-6">
-          <div className="flex w-full flex-col items-center text-center">
-            <div className="relative mb-8 flex items-center justify-center">
-              <div className="absolute h-28 w-28 rounded-full bg-primary/10 blur-2xl" />
-              <div className="relative flex h-24 w-24 items-center justify-center rounded-full border border-primary/15 bg-white shadow-lg dark:bg-white">
-                <div className="absolute h-20 w-20 animate-spin rounded-full border-2 border-primary/15 border-t-primary" />
-                <div className="absolute -right-2 -top-2 rounded-2xl bg-primary p-2 text-primary-foreground shadow-md animate-[bounce_1.8s_ease-in-out_infinite]">
-                  <Bot className="h-4 w-4" />
-                </div>
-                <BrandLogo className="h-12 w-12 rounded-[1.1rem] p-1 shadow-md" imageClassName="rounded-[0.9rem]" />
-              </div>
-            </div>
-
-            <div className="mb-3 inline-flex items-center gap-2 rounded-full border border-primary/15 bg-white/80 px-4 py-2 text-xs font-medium text-primary shadow-sm">
-              <Sparkles className="h-3.5 w-3.5" />
-              Safrinia preparando sua leitura da área
-            </div>
-
-            <h1 className="max-w-2xl text-3xl font-black tracking-tight text-foreground sm:text-4xl">
-              Gerando seu dashboard agroclimático
-            </h1>
-
-            <p className="mt-3 max-w-2xl text-sm leading-relaxed text-muted-foreground sm:text-base">
-              Estamos cruzando clima, satélite, território e contexto agronômico para montar uma leitura mais clara da sua área.
-            </p>
-
-            <div className="mt-8 min-h-16 max-w-2xl rounded-2xl border bg-white/85 px-5 py-4 text-sm text-foreground shadow-sm backdrop-blur sm:text-base">
-              <span>{typedLoadingText}</span>
-              <span className="ml-1 inline-block h-5 w-[2px] animate-pulse bg-primary align-middle" />
-            </div>
-
-            <div className="mt-6 h-1.5 w-full max-w-md overflow-hidden rounded-full bg-primary/10">
-              <div
-                className="h-full rounded-full bg-primary transition-all duration-500"
-                style={{ width: `${((loadingStep + 1) / LOADING_MESSAGES.length) * 100}%` }}
-              />
-            </div>
-
-            <p className="mt-4 text-xs text-muted-foreground">
-              Isso leva só alguns segundos.
-            </p>
-          </div>
-        </div>
-      </div>
-    )
+    return <AnalysisLoadingScreen />
   }
 
   if (!data) {
@@ -777,6 +820,9 @@ export default function ResultsPage() {
 
   const risk = RISK_CONFIG[data.summary.risk_level] ?? RISK_CONFIG.moderado
   const { metrics, risk_flags, forecast_timeseries, copilot_response, field_info, summary, data_sources: dataSources } = data
+  const climateHistory = dataSources.climate_history
+  const soil = dataSources.soil
+  const satelliteData = dataSources.satellite
 
   const criticalFlags = [
     risk_flags.dry_risk_flag && "seca no curto prazo",
@@ -792,7 +838,7 @@ export default function ResultsPage() {
 
   const sourceStatus =
     dataSources.climate.provider.toLowerCase().includes("synthetic") ||
-    dataSources.satellite.provider.toLowerCase().includes("synthetic")
+    satelliteData.provider.toLowerCase().includes("synthetic")
       ? "Análise com parte dos sinais em fallback."
       : "Análise baseada em fontes conectadas."
 
@@ -802,12 +848,23 @@ export default function ResultsPage() {
     "Temp (°C)": d.temp_c,
   }))
 
-  const ndviChart = dataSources.satellite.ndvi_timeseries?.length > 0 
-    ? dataSources.satellite.ndvi_timeseries.map((d: any) => ({
+  const ndviChart = satelliteData.ndvi_timeseries?.length > 0 
+    ? satelliteData.ndvi_timeseries.map((d: any) => ({
         data: fmtDate(d.date),
         NDVI: d.ndvi,
       }))
     : []
+
+  const observedRainChart = climateHistory?.timeseries_30d?.length
+    ? climateHistory.timeseries_30d.map((d) => ({
+        dia: fmtDate(d.date),
+        "Chuva observada (mm)": d.precip_mm,
+      }))
+    : []
+
+  const chirpsLagWarning = typeof climateHistory?.data_lag_days === "number" && climateHistory.data_lag_days > 15
+  const satelliteTrend = trendMeta(satelliteData.ndvi_trend)
+  const SatelliteTrendIcon = satelliteTrend.icon
 
   const mapCenter: [number, number] = [
     data.map_layer.geometry.coordinates[0].reduce((s: number, c: number[]) => s + c[1], 0) /
@@ -850,7 +907,7 @@ export default function ResultsPage() {
                 {/* Score circular */}
                 <div className="relative flex items-center justify-center shrink-0">
                   <svg width="80" height="80" viewBox="0 0 80 80">
-                    <circle cx="40" cy="40" r="32" fill="none" stroke="#e2e8f0" strokeWidth="7" />
+                    <circle cx="40" cy="40" r="32" fill="none" stroke="var(--border)" strokeWidth="7" />
                     <circle
                       cx="40" cy="40" r="32"
                       fill="none"
@@ -985,11 +1042,19 @@ export default function ResultsPage() {
               <CardContent>
                 <ResponsiveContainer width="100%" height={190}>
                   <ComposedChart data={forecastChart} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-                    <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                    <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                     <XAxis dataKey="dia" tick={{ fontSize: 9 }} />
                     <YAxis yAxisId="left" tick={{ fontSize: 9 }} width={32} />
                     <YAxis yAxisId="right" orientation="right" tick={{ fontSize: 9 }} domain={[20, 40]} width={32} />
-                    <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8, border: "1px solid #e2e8f0" }} />
+                    <Tooltip
+                      contentStyle={{
+                        fontSize: 11,
+                        borderRadius: 8,
+                        border: "1px solid var(--border)",
+                        backgroundColor: "var(--card)",
+                        color: "var(--card-foreground)",
+                      }}
+                    />
                     <Legend wrapperStyle={{ fontSize: 10 }} />
                     <Bar yAxisId="left" dataKey="Chuva (mm)" fill="#93c5fd" isAnimationActive={false} />
                     <Line yAxisId="right" dataKey="Temp (°C)" stroke="#f97316" dot={false} strokeWidth={2} isAnimationActive={false} />
@@ -997,6 +1062,79 @@ export default function ResultsPage() {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
+
+            {climateHistory && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <CloudRain className="h-4 w-4 text-primary" />
+                      <CardTitle className="text-sm font-semibold">Clima observado — CHIRPS</CardTitle>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <DataQualityBadge provider={climateHistory.provider} />
+                      <HelpTooltip text="Este bloco mostra chuva observada dos últimos 30 dias, diferente do forecast que olha para frente. É útil para entender o que já aconteceu recentemente na área e se existe anomalia relevante." />
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {(climateHistory.provider || "Clima histórico")} · {(climateHistory.dataset || "dataset não informado")}
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  {chirpsLagWarning && (
+                    <div className="rounded-xl border border-amber-200 bg-amber-50 p-3 dark:border-amber-950/60 dark:bg-amber-950/35">
+                      <p className="text-sm font-medium text-amber-800 dark:text-amber-300">
+                        Histórico CHIRPS com defasagem de {climateHistory.data_lag_days} dias.
+                      </p>
+                    </div>
+                  )}
+
+                  <div className="grid gap-3 md:grid-cols-2 xl:grid-cols-4">
+                    <DetailStat
+                      label="Chuva observada 7d"
+                      value={`${fmtValue(climateHistory.precip_observed_7d_mm ?? 0, 1)} mm`}
+                    />
+                    <DetailStat
+                      label="Chuva observada 30d"
+                      value={`${fmtValue(climateHistory.precip_observed_30d_mm ?? 0, 1)} mm`}
+                    />
+                    <DetailStat
+                      label="Anomalia 30d"
+                      value={`${fmtValue(climateHistory.precip_anomaly_30d_pct ?? 0, 1)}%`}
+                      hint={`Climatologia: ${fmtValue(climateHistory.precip_climatology_30d_mm ?? 0, 1)} mm`}
+                    />
+                    <DetailStat
+                      label="Dias secos 30d"
+                      value={`${fmtValue(climateHistory.dry_days_30d ?? 0)} dias`}
+                      hint={`Última observação: ${climateHistory.latest_observed_date ? fmtDate(climateHistory.latest_observed_date) : "não informada"}`}
+                    />
+                  </div>
+
+                  {observedRainChart.length > 0 && (
+                    <div>
+                      <p className="mb-2 text-xs font-medium text-muted-foreground">Chuva observada nos últimos 30 dias</p>
+                      <ResponsiveContainer width="100%" height={180}>
+                        <ComposedChart data={observedRainChart} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
+                          <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
+                          <XAxis dataKey="dia" tick={{ fontSize: 9 }} />
+                          <YAxis tick={{ fontSize: 9 }} width={32} />
+                          <Tooltip
+                            contentStyle={{
+                              fontSize: 11,
+                              borderRadius: 8,
+                              border: "1px solid var(--border)",
+                              backgroundColor: "var(--card)",
+                              color: "var(--card-foreground)",
+                            }}
+                          />
+                          <Bar dataKey="Chuva observada (mm)" fill="#38bdf8" isAnimationActive={false} />
+                        </ComposedChart>
+                      </ResponsiveContainer>
+                    </div>
+                  )}
+                </CardContent>
+              </Card>
+            )}
 
             <Card>
               <CardHeader className="pb-2">
@@ -1014,6 +1152,55 @@ export default function ResultsPage() {
               </CardContent>
             </Card>
 
+            <Card>
+              <CardHeader className="pb-2">
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <Satellite className="h-4 w-4 text-primary" />
+                    <CardTitle className="text-sm font-semibold">Satélite — leitura de vegetação</CardTitle>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <DataQualityBadge provider={satelliteData.provider} />
+                    <HelpTooltip text="Este bloco resume o comportamento recente do NDVI. Ele ajuda a entender se a vegetação está melhorando, piorando ou se existe um comportamento fora do esperado para o potencial estrutural da área." />
+                  </div>
+                </div>
+                <p className="text-xs text-muted-foreground">
+                  {satelliteData.provider} · Última imagem: {satelliteData.last_image ? fmtDate(satelliteData.last_image) : "não informada"}
+                </p>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                {satelliteData.vegetation_mismatch_flag && (
+                  <div className="rounded-xl border border-red-200 bg-red-50 p-3 dark:border-red-950/60 dark:bg-red-950/35">
+                    <p className="text-sm font-medium text-red-800 dark:text-red-300">
+                      NDVI em queda em área com potencial estrutural melhor: investigar causa local.
+                    </p>
+                  </div>
+                )}
+
+                <div className="grid gap-3 md:grid-cols-3">
+                  <div className="rounded-xl border bg-card/80 p-3">
+                    <div className="mb-2 flex items-center gap-2">
+                      <span className={cn("rounded-full border px-2 py-1 text-[11px] font-medium", satelliteTrend.className)}>
+                        <span className="inline-flex items-center gap-1">
+                          <SatelliteTrendIcon className="h-3.5 w-3.5" />
+                          {satelliteTrend.label}
+                        </span>
+                      </span>
+                    </div>
+                    <p className="text-[11px] uppercase tracking-wide text-muted-foreground">Tendência NDVI</p>
+                  </div>
+                  <DetailStat
+                    label="Delta NDVI 30d"
+                    value={fmtValue(satelliteData.ndvi_delta_30d ?? 0, 3)}
+                  />
+                  <DetailStat
+                    label="Anomalia NDVI"
+                    value={fmtValue(satelliteData.ndvi_anomaly ?? 0, 3)}
+                  />
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Gráfico NDVI */}
             {ndviChart.length > 0 && (
               <Card>
@@ -1023,20 +1210,73 @@ export default function ResultsPage() {
                     <HelpTooltip text="NDVI é um indicador de vigor da vegetação. Em geral, curvas mais altas e estáveis sugerem melhor resposta vegetativa; quedas podem sinalizar estresse e devem ser lidas junto com clima e estágio da cultura." />
                   </div>
                   <p className="text-xs text-muted-foreground">
-                    {dataSources.satellite.provider} · Nuvens: {dataSources.satellite.cloud_cover_pct}%
+                    {satelliteData.provider} · Nuvens: {satelliteData.cloud_cover_pct}%
                   </p>
                 </CardHeader>
                 <CardContent>
                   <ResponsiveContainer width="100%" height={160}>
                     <LineChart data={ndviChart} margin={{ top: 4, right: 8, left: 0, bottom: 0 }}>
-                      <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
+                      <CartesianGrid strokeDasharray="3 3" stroke="var(--border)" />
                       <XAxis dataKey="data" tick={{ fontSize: 9 }} />
                       <YAxis tick={{ fontSize: 9 }} domain={[0.3, 0.9]} width={36} />
-                      <Tooltip contentStyle={{ fontSize: 11, borderRadius: 8, border: "1px solid #e2e8f0" }} />
-                      <Line dataKey="NDVI" stroke="#16a34a" strokeWidth={2.5}
-                        dot={{ fill: "#16a34a", r: 4 }} activeDot={{ r: 6 }} isAnimationActive={false} />
+                      <Tooltip
+                        contentStyle={{
+                          fontSize: 11,
+                          borderRadius: 8,
+                          border: "1px solid var(--border)",
+                          backgroundColor: "var(--card)",
+                          color: "var(--card-foreground)",
+                        }}
+                      />
+                      <Line dataKey="NDVI" stroke="var(--primary)" strokeWidth={2.5}
+                        dot={{ fill: "var(--primary)", r: 4 }} activeDot={{ r: 6 }} isAnimationActive={false} />
                     </LineChart>
                   </ResponsiveContainer>
+                </CardContent>
+              </Card>
+            )}
+
+            {soil && (
+              <Card>
+                <CardHeader className="pb-2">
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex items-center gap-2">
+                      <Waves className="h-4 w-4 text-primary" />
+                      <CardTitle className="text-sm font-semibold">Solo — contexto estrutural</CardTitle>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <DataQualityBadge provider={soil.provider} source={soil.source} />
+                      <HelpTooltip text="Solo é contexto estrutural, não diagnóstico dinâmico da safra atual. Esse bloco ajuda a entender potencial e limitação de base da área, mas não substitui leitura climática e vegetativa de curto prazo." />
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground">
+                    {soil.provider || "Solo"} · escopo {soil.interpretation_scope || "estrutural"}
+                  </p>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="rounded-xl border border-border bg-muted/60 p-3 dark:bg-muted/40">
+                    <p className="text-sm font-medium text-foreground">
+                      Solo é contexto estrutural, não diagnóstico dinâmico da safra atual.
+                    </p>
+                  </div>
+
+                  <div className="grid gap-3 md:grid-cols-3">
+                    <DetailStat
+                      label="Qualidade de solo"
+                      value={`${fmtValue((soil.soil_quality_index ?? 0) * 100, 0)} / 100`}
+                      hint={toTitle(soil.soil_quality_label)}
+                    />
+                    <DetailStat
+                      label="Confiança"
+                      value={`${fmtValue((soil.confidence_index ?? 0) * 100, 0)} / 100`}
+                      hint={`Amostras: ${fmtValue(soil.sample_count ?? 0)}`}
+                    />
+                    <DetailStat
+                      label="Amostra mais próxima"
+                      value={soil.nearest_sample_km != null ? `${fmtValue(soil.nearest_sample_km, 1)} km` : "Não informado"}
+                      hint={`Confiabilidade de curto prazo: ${toTitle(soil.short_term_reliability)}`}
+                    />
+                  </div>
                 </CardContent>
               </Card>
             )}
@@ -1074,10 +1314,10 @@ export default function ResultsPage() {
                   </ul>
                 </div>
                 <Separator />
-                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3">
+                <div className="rounded-xl border border-emerald-200 bg-emerald-50 p-3 dark:border-emerald-950/60 dark:bg-emerald-950/35">
                   <div className="mb-1 flex items-center gap-2">
-                    <CheckCircle2 className="h-4 w-4 text-emerald-600 shrink-0" />
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-700">Ação sugerida</p>
+                    <CheckCircle2 className="h-4 w-4 shrink-0 text-emerald-600 dark:text-emerald-300" />
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-emerald-700 dark:text-emerald-300">Ação sugerida</p>
                   </div>
                   <p className="text-sm font-medium text-foreground">{copilot_response.action}</p>
                 </div>
@@ -1138,19 +1378,45 @@ export default function ResultsPage() {
               <div className="space-y-2">
                 <SourceCard icon={CloudRain} title="Clima"
                   subtitle={`${dataSources.climate.provider} · ${dataSources.climate.model}`}
-                  signals={dataSources.climate.signals || ["Precipitação", "Temperatura", "Umidade"]} defaultOpen />
+                  signals={dataSources.climate.signals || ["Precipitação", "Temperatura", "Umidade"]} defaultOpen
+                  provider={dataSources.climate.provider}
+                />
+                {climateHistory && (
+                  <SourceCard
+                    icon={Clock}
+                    title="Clima observado — CHIRPS"
+                    subtitle={`${climateHistory.provider || "Histórico"} · ${climateHistory.dataset || "dataset"}`}
+                    signals={climateHistory.signals || ["Chuva observada", "Anomalia recente", "Dias secos"]}
+                    provider={climateHistory.provider}
+                  />
+                )}
                 <SourceCard icon={Satellite} title="Satélite"
-                  subtitle={`${dataSources.satellite.provider} · ${fmtDate(dataSources.satellite.last_image)}`}
-                  signals={dataSources.satellite.signals || ["NDVI", "EVI", "Cobertura de nuvens"]} defaultOpen />
+                  subtitle={`${satelliteData.provider} · ${fmtDate(satelliteData.last_image)}`}
+                  signals={satelliteData.signals || ["NDVI", "EVI", "Cobertura de nuvens"]} defaultOpen
+                  provider={satelliteData.provider}
+                />
+                {soil && (
+                  <SourceCard
+                    icon={Waves}
+                    title="Solo estrutural"
+                    subtitle={`${soil.provider || "Solo"} · ${soil.temporal_nature || "histórico"}`}
+                    signals={soil.signals || ["Contexto estrutural do solo"]}
+                    provider={soil.provider}
+                    source={soil.source}
+                  />
+                )}
                 <SourceCard
                   icon={FileText}
                   title={`ZARC — Classe ${dataSources.zarc.zarc_class} (${dataSources.zarc.zarc_label})`}
                   subtitle={dataSources.zarc.provider}
                   signals={dataSources.zarc.signals || ["Zoneamento", "Risco de plantio"]}
+                  provider={dataSources.zarc.provider}
                 />
                 <SourceCard icon={Clock} title="Histórico"
                   subtitle={`${dataSources.historical.provider} · ${dataSources.historical.period}`}
-                  signals={dataSources.historical.signals || ["Precipitação histórica", "Temperatura média", "Padrões climáticos"]} />
+                  signals={dataSources.historical.signals || ["Precipitação histórica", "Temperatura média", "Padrões climáticos"]}
+                  provider={dataSources.historical.provider}
+                />
               </div>
             </div>
 
