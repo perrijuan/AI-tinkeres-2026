@@ -88,7 +88,7 @@ def generate_copilot_response(analysis: dict) -> dict:
         raise EnvironmentError("GEMINI_API_KEY não configurada.")
 
     genai.configure(api_key=api_key)
-    model = genai.GenerativeModel("gemini-2.0-flash")
+    model = genai.GenerativeModel("gemini-1.5-flash")
 
     prompt = _build_prompt(analysis)
     response = model.generate_content(prompt)
