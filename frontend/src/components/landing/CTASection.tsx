@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge"
 import { Card, CardContent } from "@/components/ui/card"
 import { Alert, AlertDescription } from "@/components/ui/alert"
 import { ArrowRight, CheckCircle2 } from "lucide-react"
+import { trackEmailSignup } from "@/lib/analytics"
 
 export default function CTASection() {
   const [email, setEmail] = useState("")
@@ -12,7 +13,10 @@ export default function CTASection() {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
-    if (email) setSubmitted(true)
+    if (email) {
+      trackEmailSignup("cta_section")
+      setSubmitted(true)
+    }
   }
 
   return (
@@ -55,6 +59,7 @@ export default function CTASection() {
                 </p>
                 <div className="flex gap-2">
                   <Input
+                    id="input-cta-email"
                     type="email"
                     placeholder="seu@email.com"
                     value={email}
@@ -62,8 +67,12 @@ export default function CTASection() {
                     className="bg-white/10 border-white/20 text-white placeholder:text-white/40 focus:border-primary flex-1"
                     required
                   />
-                  {/* variant="default" → bg-primary automaticamente */}
-                  <Button type="submit" className="gap-1.5 shrink-0" size="sm">
+                  <Button
+                    id="btn-cta-email-enviar"
+                    type="submit"
+                    className="gap-1.5 shrink-0"
+                    size="sm"
+                  >
                     Enviar
                     <ArrowRight className="w-3.5 h-3.5" />
                   </Button>

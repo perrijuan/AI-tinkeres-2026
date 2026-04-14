@@ -13,6 +13,7 @@ import { Separator } from "@/components/ui/separator"
 import { Menu } from "lucide-react"
 import BrandLogo from "@/components/BrandLogo"
 import { cn } from "@/lib/utils"
+import { trackCTAClick, trackNavClick } from "@/lib/analytics"
 
 const navLinks = [
   { href: "#problema", label: "Problema" },
@@ -70,7 +71,9 @@ export default function Navbar() {
               {navLinks.map((link) => (
                 <NavigationMenuItem key={link.href}>
                   <NavigationMenuLink
+                    id={`nav-link-${link.href.replace("#", "")}`}
                     href={link.href}
+                    onClick={() => trackNavClick(link.label, link.href)}
                     className={cn(
                       navigationMenuTriggerStyle(),
                       !scrolled &&
@@ -87,12 +90,19 @@ export default function Navbar() {
 
         <div className="flex shrink-0 items-center gap-2">
           <Button className="hidden md:flex" asChild>
-            <Link to="/solicitar-demo">Solicitar Demo</Link>
+            <Link
+              id="btn-nav-solicitar-demo-desktop"
+              to="/solicitar-demo"
+              onClick={() => trackCTAClick("btn-nav-solicitar-demo-desktop", "Solicitar Demo", "/solicitar-demo")}
+            >
+              Solicitar Demo
+            </Link>
           </Button>
 
           <Sheet open={open} onOpenChange={setOpen}>
             <SheetTrigger asChild>
               <Button
+                id="btn-nav-mobile-menu"
                 variant="ghost"
                 size="icon"
                 className={cn(
@@ -113,8 +123,9 @@ export default function Navbar() {
                 {navLinks.map((link) => (
                   <a
                     key={link.href}
+                    id={`nav-mobile-link-${link.href.replace("#", "")}`}
                     href={link.href}
-                    onClick={() => setOpen(false)}
+                    onClick={() => { setOpen(false); trackNavClick(link.label, link.href) }}
                     className="px-3 py-2.5 rounded-md text-sm hover:bg-accent transition-colors font-medium"
                   >
                     {link.label}
@@ -123,7 +134,13 @@ export default function Navbar() {
               </div>
               <Separator className="my-4" />
               <Button className="w-full" asChild>
-                <Link to="/solicitar-demo">Solicitar Demo</Link>
+                <Link
+                  id="btn-nav-solicitar-demo-mobile"
+                  to="/solicitar-demo"
+                  onClick={() => trackCTAClick("btn-nav-solicitar-demo-mobile", "Solicitar Demo", "/solicitar-demo")}
+                >
+                  Solicitar Demo
+                </Link>
               </Button>
             </SheetContent>
           </Sheet>

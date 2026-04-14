@@ -64,6 +64,12 @@ import {
 import { cn } from "@/lib/utils"
 import { API_ENDPOINTS } from "@/config"
 import ReactMarkdown from "react-markdown"
+import {
+  trackCTAClick,
+  trackChatOpened,
+  trackChatClosed,
+  trackChatMessageSent,
+} from "@/lib/analytics"
 
 // ── Tipos ────────────────────────────────────────────────────────────────────
 
@@ -625,6 +631,8 @@ function ChatPanel({
     const text = input.trim()
     if (!text || sending) return
     setInput("")
+    const userMessageIndex = messages.filter((m) => m.role === "user").length + 1
+    trackChatMessageSent(userMessageIndex)
     setMessages((prev) => [...prev, { role: "user", content: text }])
     setSending(true)
     try {
@@ -659,6 +667,7 @@ function ChatPanel({
         </div>
         <div className="flex items-center gap-1">
           <button
+            id="btn-results-chat-toggle-fullscreen"
             onClick={onToggleFullscreen}
             className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
             title={isFullscreen ? "Minimizar" : "Tela cheia"}
@@ -666,6 +675,7 @@ function ChatPanel({
             {isFullscreen ? <Minimize2 className="w-4 h-4" /> : <Maximize2 className="w-4 h-4" />}
           </button>
           <button
+            id="btn-results-chat-fechar"
             onClick={onClose}
             className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors"
             title="Fechar"
@@ -721,6 +731,7 @@ function ChatPanel({
       <div className="p-3 border-t shrink-0">
         <div className="flex gap-2">
           <input
+            id="input-results-chat-mensagem"
             type="text"
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -730,6 +741,7 @@ function ChatPanel({
             className="flex-1 rounded-lg border bg-background px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-primary/50 disabled:opacity-50"
           />
           <button
+            id="btn-results-chat-enviar"
             onClick={handleSend}
             disabled={!input.trim() || sending}
             className="p-2 rounded-lg bg-primary text-primary-foreground disabled:opacity-40 hover:bg-primary/90 transition-colors"
@@ -800,7 +812,8 @@ function FieldMap({
         <>
           {!chatOpen && (
             <button
-              onClick={onOpenChat}
+              id="btn-results-abrir-chat"
+              onClick={() => { onOpenChat(); trackChatOpened() }}
               className="fixed bottom-6 right-4 z-9999 flex min-h-10 items-center gap-2 rounded-full bg-primary px-3 py-2 text-xs font-medium text-primary-foreground shadow-lg transition-all hover:bg-primary/90 sm:px-4 sm:py-3 sm:text-sm lg:absolute lg:bottom-4 lg:right-3 lg:top-auto lg:z-1000"
             >
               <MessageCircle className="h-4 w-4" />
@@ -978,11 +991,21 @@ export default function ResultsPage() {
       {/* Header */}
       <header className="border-b bg-background/95 backdrop-blur-sm z-50 shrink-0">
         <div className="container mx-auto flex min-h-14 max-w-full items-center justify-between gap-3 px-3 py-2 sm:px-4">
-          <Link to="/" className="flex items-center gap-2">
+          <Link
+            id="btn-results-header-logo"
+            to="/"
+            className="flex items-center gap-2"
+            onClick={() => trackCTAClick("btn-results-header-logo", "SafraViva", "/")}
+          >
             <BrandLogo className="h-8 w-8 rounded-[0.95rem]" imageClassName="rounded-[0.7rem]" />
             <span className="font-bold text-sm">SafraViva</span>
           </Link>
-          <Link to="/solicitar-demo" className="flex shrink-0 items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground">
+          <Link
+            id="btn-results-nova-analise"
+            to="/solicitar-demo"
+            className="flex shrink-0 items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-foreground"
+            onClick={() => trackCTAClick("btn-results-nova-analise", "Nova análise", "/solicitar-demo")}
+          >
             <ArrowLeft className="w-3.5 h-3.5" />
             Nova análise
           </Link>
@@ -1062,7 +1085,7 @@ export default function ResultsPage() {
                 chatOpen={chatOpen}
                 chatFullscreen={chatFullscreen}
                 onOpenChat={() => setChatOpen(true)}
-                onCloseChat={() => { setChatOpen(false); setChatFullscreen(false) }}
+                onCloseChat={() => { setChatOpen(false); setChatFullscreen(false); trackChatClosed() }}
                 onToggleFullscreen={() => setChatFullscreen((f) => !f)}
                 className="h-[52vh] min-h-[24rem] rounded-lg border sm:min-h-80"
               />
@@ -1556,7 +1579,7 @@ export default function ResultsPage() {
           chatOpen={chatOpen}
           chatFullscreen={chatFullscreen}
           onOpenChat={() => setChatOpen(true)}
-          onCloseChat={() => { setChatOpen(false); setChatFullscreen(false) }}
+          onCloseChat={() => { setChatOpen(false); setChatFullscreen(false); trackChatClosed() }}
           onToggleFullscreen={() => setChatFullscreen((f) => !f)}
           className="hidden flex-1 lg:block"
         />

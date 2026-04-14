@@ -1,6 +1,7 @@
 import Navbar from "@/components/landing/Navbar"
 import Footer from "@/components/landing/Footer"
 import BrandLogo from "@/components/BrandLogo"
+import { trackCTAClick } from "@/lib/analytics"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
@@ -202,7 +203,11 @@ export default function LandingPage() {
 
               <div className="mt-7 flex flex-col gap-3 sm:mt-8 sm:flex-row sm:flex-wrap">
                 <Button size="lg" className="w-full gap-2 shadow-lg shadow-black/25 sm:w-auto" asChild>
-                  <a href="#contato">
+                  <a
+                    id="btn-landing-hero-solicitar-demo"
+                    href="#contato"
+                    onClick={() => trackCTAClick("btn-landing-hero-solicitar-demo", "Solicitar demo", "#contato")}
+                  >
                     Solicitar demo
                     <ArrowRight className="h-4 w-4" />
                   </a>
@@ -213,7 +218,13 @@ export default function LandingPage() {
                   className="w-full border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white sm:w-auto"
                   asChild
                 >
-                  <a href="#como-funciona">Ver workflow</a>
+                  <a
+                    id="btn-landing-hero-ver-workflow"
+                    href="#como-funciona"
+                    onClick={() => trackCTAClick("btn-landing-hero-ver-workflow", "Ver workflow", "#como-funciona")}
+                  >
+                    Ver workflow
+                  </a>
                 </Button>
               </div>
             </div>
@@ -465,13 +476,23 @@ export default function LandingPage() {
 
                 <div className="flex flex-col gap-3">
                   <Button size="lg" className="gap-2" asChild>
-                    <a href="/solicitar-demo">
+                    <a
+                      id="btn-landing-cta-ir-demo"
+                      href="/solicitar-demo"
+                      onClick={() => trackCTAClick("btn-landing-cta-ir-demo", "Ir para a demo", "/solicitar-demo")}
+                    >
                       Ir para a demo
                       <ArrowRight className="h-4 w-4" />
                     </a>
                   </Button>
                   <Button size="lg" variant="outline" asChild>
-                    <a href="#mercado">Voltar ao problema</a>
+                    <a
+                      id="btn-landing-cta-voltar-problema"
+                      href="#mercado"
+                      onClick={() => trackCTAClick("btn-landing-cta-voltar-problema", "Voltar ao problema", "#mercado")}
+                    >
+                      Voltar ao problema
+                    </a>
                   </Button>
                 </div>
               </CardContent>

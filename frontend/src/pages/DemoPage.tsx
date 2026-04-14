@@ -1,4 +1,4 @@
-import { useState, useCallback, useEffect } from "react"
+import { useState, useCallback, useEffect, useRef } from "react"
 import { Link, useNavigate } from "react-router-dom"
 import {
   MapContainer,
@@ -18,6 +18,13 @@ import AnalysisLoadingScreen from "@/components/AnalysisLoadingScreen"
 import BrandLogo from "@/components/BrandLogo"
 import { cn } from "@/lib/utils"
 import { API_ENDPOINTS } from "@/config"
+import {
+  trackFunnelStepView,
+  trackFunnelStepComplete,
+  trackDemoSubmitted,
+  trackCulturaSelected,
+  trackCTAClick,
+} from "@/lib/analytics"
 import {
   ArrowLeft,
   ArrowRight,
@@ -103,6 +110,16 @@ export default function DemoPage() {
     }
   }, [])
 
+  // Rastreia a visualização de cada passo do funil
+  const stepNames = ["seus-dados", "cultura", "area"]
+  const prevStep = useRef(0)
+  useEffect(() => {
+    if (step !== prevStep.current) {
+      prevStep.current = step
+      trackFunnelStepView(step, stepNames[step - 1])
+    }
+  }, [step]) // eslint-disable-line react-hooks/exhaustive-deps
+
   const addPoint = useCallback((latlng: LatLng) => {
     setPoints((prev) => [...prev, latlng])
   }, [])
@@ -118,6 +135,8 @@ export default function DemoPage() {
 
   const handleConfirm = async () => {
     if (!canConfirm) return
+    trackFunnelStepComplete(3, "area", { vertices: points.length })
+    trackDemoSubmitted(cultura, areaHa)
     setLoading(true)
 
     // Novo payload conforme contrato API
@@ -215,7 +234,12 @@ export default function DemoPage() {
           </div>
 
           <Button variant="ghost" size="sm" className="shrink-0" asChild>
-            <Link to="/" className="gap-1.5 text-muted-foreground">
+            <Link
+              id="btn-demo-header-voltar"
+              to="/"
+              className="gap-1.5 text-muted-foreground"
+              onClick={() => trackCTAClick("btn-demo-header-voltar", "Voltar", "/")}
+            >
               <ArrowLeft className="w-3.5 h-3.5" />
               <span className="hidden sm:block">Voltar</span>
             </Link>
@@ -284,9 +308,13 @@ export default function DemoPage() {
             </div>
 
             <Button
+              id="btn-demo-step1-proximo"
               className="w-full gap-2"
               disabled={!canStep1}
-              onClick={() => setStep(2)}
+              onClick={() => {
+                trackFunnelStepComplete(1, "seus-dados")
+                setStep(2)
+              }}
             >
               Próximo
               <ArrowRight className="w-4 h-4" />
@@ -312,8 +340,12 @@ export default function DemoPage() {
             {culturas.map((c) => (
               <button
                 key={c.id}
+                id={`btn-demo-cultura-${c.id}`}
                 type="button"
-                onClick={() => setCultura(c.id)}
+                onClick={() => {
+                  setCultura(c.id)
+                  trackCulturaSelected(c.id, c.label)
+                }}
                 className={cn(
                   "flex flex-col items-center gap-2 rounded-xl border-2 p-4 transition-all cursor-pointer hover:border-primary/50",
                   cultura === c.id
@@ -333,14 +365,23 @@ export default function DemoPage() {
           </div>
 
           <div className="flex w-full max-w-2xl flex-col gap-3 sm:flex-row">
-            <Button variant="outline" className="gap-2 sm:w-auto" onClick={() => setStep(1)}>
+            <Button
+              id="btn-demo-step2-voltar"
+              variant="outline"
+              className="gap-2 sm:w-auto"
+              onClick={() => setStep(1)}
+            >
               <ArrowLeft className="w-4 h-4" />
               Voltar
             </Button>
             <Button
+              id="btn-demo-step2-proximo"
               className="flex-1 gap-2"
               disabled={!canStep2}
-              onClick={() => setStep(3)}
+              onClick={() => {
+                trackFunnelStepComplete(2, "cultura", { cultura_id: cultura })
+                setStep(3)
+              }}
             >
               Próximo
               <ArrowRight className="w-4 h-4" />
@@ -391,6 +432,7 @@ export default function DemoPage() {
           {/* Painel flutuante: topo esquerdo — controles */}
           <div className="absolute left-3 right-3 top-3 z-1000 flex flex-wrap gap-2 sm:left-4 sm:right-auto sm:top-4">
             <button
+              id="btn-demo-step3-voltar"
               onClick={() => setStep(2)}
               className="flex min-h-10 items-center gap-1.5 rounded-lg border bg-background/95 px-3 py-2 text-sm font-medium shadow backdrop-blur-sm transition-colors hover:bg-accent"
             >
@@ -398,6 +440,7 @@ export default function DemoPage() {
               Voltar
             </button>
             <button
+              id="btn-demo-step3-desfazer"
               onClick={undo}
               disabled={points.length === 0}
               className="flex min-h-10 items-center gap-1.5 rounded-lg border bg-background/95 px-3 py-2 text-sm font-medium shadow backdrop-blur-sm transition-colors hover:bg-accent disabled:pointer-events-none disabled:opacity-40"
@@ -406,6 +449,7 @@ export default function DemoPage() {
               Desfazer
             </button>
             <button
+              id="btn-demo-step3-limpar"
               onClick={clear}
               disabled={points.length === 0}
               className="flex min-h-10 items-center gap-1.5 rounded-lg border bg-background/95 px-3 py-2 text-sm font-medium text-destructive shadow backdrop-blur-sm transition-colors hover:bg-destructive/10 disabled:pointer-events-none disabled:opacity-40"
@@ -442,6 +486,7 @@ export default function DemoPage() {
                     </div>
                   </div>
                   <Button
+                    id="btn-demo-ver-analise"
                     className="w-full gap-2"
                     onClick={handleConfirm}
                     disabled={loading}

@@ -2,6 +2,7 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
 import { ArrowRight, ChevronDown, Radio, TrendingUp, Shield } from "lucide-react"
+import { trackCTAClick } from "@/lib/analytics"
 
 const FIELD_IMAGE =
   "https://images.pexels.com/photos/7728939/pexels-photo-7728939.jpeg"
@@ -45,7 +46,11 @@ export default function HeroSection() {
 
           <div className="flex flex-wrap gap-3">
             <Button size="lg" className="gap-2 shadow-lg shadow-black/30" asChild>
-              <a href="#faq">
+              <a
+                id="btn-hero-ver-como-funciona"
+                href="#faq"
+                onClick={() => trackCTAClick("btn-hero-ver-como-funciona", "Ver como funciona", "#faq")}
+              >
                 Ver como funciona
                 <ArrowRight className="w-4 h-4" />
               </a>
@@ -56,7 +61,13 @@ export default function HeroSection() {
               className="border-white/25 text-white hover:bg-white/10 hover:text-white"
               asChild
             >
-              <a href="#contato">Solicitar Demo</a>
+              <a
+                id="btn-hero-solicitar-demo"
+                href="#contato"
+                onClick={() => trackCTAClick("btn-hero-solicitar-demo", "Solicitar Demo", "#contato")}
+              >
+                Solicitar Demo
+              </a>
             </Button>
           </div>
 
