@@ -24,8 +24,7 @@ export default function Footer() {
               <span className="font-bold text-white text-base">SafraViva</span>
             </div>
             <p className="text-sm leading-relaxed">
-              Inteligência climática para decisões mais seguras no
-              agronegócio brasileiro.
+              A inteligência que salva alimentos.
             </p>
             <div className="flex gap-1.5 flex-wrap">
               {["ODS 2", "ODS 13", "ODS 17"].map((ods) => (
